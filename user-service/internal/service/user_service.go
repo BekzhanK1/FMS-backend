@@ -1,5 +1,3 @@
-// internal/service/user_service.go
-
 package service
 
 import (
@@ -8,7 +6,6 @@ import (
 	"time"
 )
 
-// CreateUser creates a new user
 func CreateUser(email, username, phone, passwordHash string, isActive bool, role models.Role, profilePicture string) (*models.User, error) {
 	user := &models.User{
 		Email:           email,
@@ -28,12 +25,10 @@ func CreateUser(email, username, phone, passwordHash string, isActive bool, role
 	return user, nil
 }
 
-// GetUser retrieves a user by ID
 func GetUser(id int) (*models.User, error) {
 	return repository.GetUser(id)
 }
 
-// UpdateUser updates user information
 func UpdateUser(id int, email, username, phone, passwordHash string, isActive bool, role models.Role, profilePicture string) error {
 	user := &models.User{
 		ID:              id,
@@ -49,7 +44,6 @@ func UpdateUser(id int, email, username, phone, passwordHash string, isActive bo
 	return repository.UpdateUser(user)
 }
 
-// DeleteUser removes a user by ID
 func DeleteUser(id int) error {
 	return repository.DeleteUser(id)
 }

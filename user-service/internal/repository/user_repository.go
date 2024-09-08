@@ -30,7 +30,6 @@ func CreateUser(user *models.User) error {
 	return nil
 }
 
-// GetUser retrieves a user by ID
 func GetUser(id int) (*models.User, error) {
 	query := `SELECT id, email, username, phone_number, password_hash, is_active, role, profile_picture_url, created_at, updated_at FROM Users WHERE id = $1`
 	row := database.DB.QueryRow(query, id)
@@ -56,7 +55,6 @@ func GetUser(id int) (*models.User, error) {
 	return user, nil
 }
 
-// UpdateUser updates an existing user
 func UpdateUser(user *models.User) error {
 	query := `
 		UPDATE Users
@@ -80,7 +78,6 @@ func UpdateUser(user *models.User) error {
 	return nil
 }
 
-// DeleteUser removes a user by ID
 func DeleteUser(id int) error {
 	query := `DELETE FROM Users WHERE id = $1`
 	_, err := database.DB.Exec(query, id)

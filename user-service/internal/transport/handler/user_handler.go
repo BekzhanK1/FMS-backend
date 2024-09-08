@@ -1,5 +1,3 @@
-// internal/handler/user_handler.go
-
 package handler
 
 import (
@@ -19,7 +17,6 @@ func HelloWorld(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-// CreateUserHandler handles user creation
 func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	var userInput struct {
 		Email           string        `json:"email"`
@@ -56,33 +53,27 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetUserHandler retrieves a user by ID
 func GetUserHandler(w http.ResponseWriter, r *http.Request) {
-	// Extract ID from the URL path using mux.Vars
 	vars := mux.Vars(r)
-	idStr := vars["id"] // The "id" here matches the name in the route
+	idStr := vars["id"]
 
-	// Convert the ID from string to integer
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
 	}
 
-	// Call the service to get the user
 	user, err := service.GetUser(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Check if the user was found
 	if user == nil {
 		http.NotFound(w, r)
 		return
 	}
 
-	// Return the user as JSON
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(user); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -90,7 +81,6 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// UpdateUserHandler updates a user
 func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	var userInput struct {
 		ID              int           `json:"id"`
@@ -125,7 +115,6 @@ func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// DeleteUserHandler removes a user by ID
 func DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get("id")
 	id, err := strconv.Atoi(idStr)
