@@ -86,3 +86,25 @@ func DeleteUser(id int) error {
 	}
 	return nil
 }
+
+func scanRowIntoUser(rows *sql.Rows) (*models.User, error) {
+	user := new(models.User)
+
+	err := rows.Scan(
+		&user.Email,
+		&user.Username,
+		&user.Phone,
+		&user.PasswordHash,
+		&user.IsActive,
+		&user.Role,
+		&user.ProfilePicture,
+		&user.UpdatedAt,
+		&user.ID,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
