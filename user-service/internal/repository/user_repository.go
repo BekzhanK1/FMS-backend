@@ -3,65 +3,79 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"user-service/internal/database"
 	"user-service/internal/models"
 )
 
-func CreateUser(user *models.User) error {
+type Store struct {
+	db *sql.DB
+}
+
+func NewStore(db *sql.DB) *Store {
+	return &Store{
+		db,
+	}
+}
+
+func (s *Store) CreateUser(user *models.User) error {
 	query := `
 		INSERT INTO Users (email, username, phone_number, password_hash, is_active, role, profile_picture_url, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		RETURNING id
 	`
-	err := database.DB.QueryRow(query,
+	_, err := s.db.Exec(query,
 		user.Email,
 		user.Username,
-		user.Phone, // This will map to the phone_number column in the database
+		user.Phone,
 		user.PasswordHash,
 		user.IsActive,
 		user.Role,
 		user.ProfilePicture,
 		user.CreatedAt,
 		user.UpdatedAt,
-	).Scan(&user.ID)
+	)
+
 	if err != nil {
 		return fmt.Errorf("could not create user: %w", err)
 	}
+
 	return nil
 }
 
-func GetUser(id int) (*models.User, error) {
-	query := `SELECT id, email, username, phone_number, password_hash, is_active, role, profile_picture_url, created_at, updated_at FROM Users WHERE id = $1`
-	row := database.DB.QueryRow(query, id)
+func (s *Store) GetUserById(id int) (*models.User, error) {
+	query := `SELECT id, email, username, phone_number, is_active, role, profile_picture_url, created_at, updated_at FROM users WHERE id = $1`
+
+	row := s.db.QueryRow(query, id)
+	
 	user := &models.User{}
 	err := row.Scan(
 		&user.ID,
 		&user.Email,
 		&user.Username,
 		&user.Phone,
-		&user.PasswordHash,
 		&user.IsActive,
 		&user.Role,
 		&user.ProfilePicture,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
+
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil // Not found
+			return nil, nil
 		}
 		return nil, fmt.Errorf("could not get user: %w", err)
 	}
+
 	return user, nil
 }
 
-func UpdateUser(user *models.User) error {
+func (s *Store) UpdateUser(userId int, user *models.User) error {
 	query := `
-		UPDATE Users
+		UPDATE users
 		SET email = $1, username = $2, phone = $3, password_hash = $4, is_active = $5, role = $6, profile_picture = $7, updated_at = $8
 		WHERE id = $9
 	`
-	_, err := database.DB.Exec(query,
+	_, err := s.db.Exec(query,
 		user.Email,
 		user.Username,
 		user.Phone,
@@ -70,41 +84,45 @@ func UpdateUser(user *models.User) error {
 		user.Role,
 		user.ProfilePicture,
 		user.UpdatedAt,
-		user.ID,
+		userId,
 	)
+
 	if err != nil {
 		return fmt.Errorf("could not update user: %w", err)
 	}
+
 	return nil
 }
 
-func DeleteUser(id int) error {
-	query := `DELETE FROM Users WHERE id = $1`
-	_, err := database.DB.Exec(query, id)
+func (s *Store) DeleteUser(id int) error {
+	query := `DELETE FROM users WHERE id = $1`
+
+	_, err := s.db.Exec(query, id)
 	if err != nil {
 		return fmt.Errorf("could not delete user: %w", err)
 	}
+
 	return nil
 }
 
-func scanRowIntoUser(rows *sql.Rows) (*models.User, error) {
-	user := new(models.User)
+// func scanRowIntoUser(rows *sql.Rows) (*models.User, error) {
+// 	user := new(models.User)
 
-	err := rows.Scan(
-		&user.Email,
-		&user.Username,
-		&user.Phone,
-		&user.PasswordHash,
-		&user.IsActive,
-		&user.Role,
-		&user.ProfilePicture,
-		&user.UpdatedAt,
-		&user.ID,
-	)
+// 	err := rows.Scan(
+// 		&user.Email,
+// 		&user.Username,
+// 		&user.Phone,
+// 		&user.PasswordHash,
+// 		&user.IsActive,
+// 		&user.Role,
+// 		&user.ProfilePicture,
+// 		&user.UpdatedAt,
+// 		&user.ID,
+// 	)
 
-	if err != nil {
-		return nil, err
-	}
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	return user, nil
-}
+// 	return user, nil
+// }

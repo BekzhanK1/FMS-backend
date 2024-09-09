@@ -1,12 +1,22 @@
 package service
 
 import (
-	"user-service/internal/models"
-	"user-service/internal/repository"
 	"time"
+	"user-service/internal/models"
+	"user-service/types"
 )
 
-func CreateUser(email, username, phone, passwordHash string, isActive bool, role models.Role, profilePicture string) (*models.User, error) {
+type Service struct {
+	store types.UserStore
+}
+
+func NewService(store types.UserStore) *Service {
+	return &Service{
+		store,
+	}
+}
+
+func (h *Service) CreateUser(email, username, phone, passwordHash string, isActive bool, role models.Role, profilePicture string) (*models.User, error) {
 	user := &models.User{
 		Email:           email,
 		Username:        username,
@@ -18,20 +28,19 @@ func CreateUser(email, username, phone, passwordHash string, isActive bool, role
 		CreatedAt:       time.Now(),
 		UpdatedAt:       time.Now(),
 	}
-	err := repository.CreateUser(user)
+	err := h.store.CreateUser(user)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
-func GetUser(id int) (*models.User, error) {
-	return repository.GetUser(id)
+func (h *Service) GetUserById(id int) (*models.User, error) {
+	return h.store.GetUserById(id)
 }
 
-func UpdateUser(id int, email, username, phone, passwordHash string, isActive bool, role models.Role, profilePicture string) error {
+func (h *Service) UpdateUser(id int, email, username, phone, passwordHash string, isActive bool, role models.Role, profilePicture string) error {
 	user := &models.User{
-		ID:              id,
 		Email:           email,
 		Username:        username,
 		Phone:           phone,
@@ -41,9 +50,10 @@ func UpdateUser(id int, email, username, phone, passwordHash string, isActive bo
 		ProfilePicture:  profilePicture,
 		UpdatedAt:       time.Now(),
 	}
-	return repository.UpdateUser(user)
+	return h.store.UpdateUser(id, user)
 }
 
-func DeleteUser(id int) error {
-	return repository.DeleteUser(id)
+
+func (h *Service) DeleteUser(id int) error {
+	return h.store.DeleteUser(id)
 }

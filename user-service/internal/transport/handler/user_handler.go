@@ -10,14 +10,33 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func HelloWorld(w http.ResponseWriter, r *http.Request) {
+type Handler struct {
+	service service.Service
+}
+
+func NewHanlder(service service.Service) *Handler {
+	return &Handler{
+		service,
+	}
+}
+
+func (h *Handler) RegisterRoutes(router *mux.Router) {
+	router.HandleFunc("", h.CreateUserHandler).Methods(http.MethodPost)
+	router.HandleFunc("/{id}", h.GetUserHandler).Methods(http.MethodGet)
+	router.HandleFunc("/{id}", h.UpdateUserHandler).Methods(http.MethodPut)
+	router.HandleFunc("/{id}", h.DeleteUserHandler).Methods(http.MethodDelete)
+}
+
+
+func (h *Handler) HelloWorld(w http.ResponseWriter, r *http.Request) {
 	_, err := w.Write([]byte("Hello, World!"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
-func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
+
+func (h *Handler) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	var userInput struct {
 		Email           string        `json:"email"`
 		Username        string        `json:"username"`
@@ -32,7 +51,7 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := service.CreateUser(
+	user, err := h.service.CreateUser(
 		userInput.Email,
 		userInput.Username,
 		userInput.Phone,
@@ -53,7 +72,7 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetUserHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idStr := vars["id"]
 
@@ -63,7 +82,7 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := service.GetUser(id)
+	user, err := h.service.GetUserById(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -81,7 +100,7 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	var userInput struct {
 		ID              int           `json:"id"`
 		Email           string        `json:"email"`
@@ -97,7 +116,7 @@ func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := service.UpdateUser(
+	err := h.service.UpdateUser(
 		userInput.ID,
 		userInput.Email,
 		userInput.Username,
@@ -115,7 +134,7 @@ func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -123,7 +142,7 @@ func DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = service.DeleteUser(id)
+	err = h.service.DeleteUser(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
