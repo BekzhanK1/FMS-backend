@@ -17,6 +17,7 @@ func Run() {
 	if err != nil {
 		log.Fatalf("error occurred connecting to db: %s", err)
 	}
+	defer db.Close()
 
 	r := mux.NewRouter()
 
