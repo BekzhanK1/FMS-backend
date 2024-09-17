@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"user-service/internal/models"
 	"user-service/internal/service"
 	"user-service/internal/utils"
 	"user-service/types"
@@ -52,7 +51,7 @@ func (h *Handler) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.service.CreateUser(payload.Email, payload.Username, payload.Phone, "", false, models.Buyer, "")
+	user, err := h.service.CreateUser(payload.Email, payload.Username, payload.Phone, payload.PasswordHash, false, payload.Role, payload.ProfilePicture)
 
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
@@ -112,12 +111,12 @@ func (h *Handler) UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// err = h.service.UpdateUser(id, payload.Username, payload.Phone, "", false, models.Buyer, "")
+	err = h.service.UpdateUser(id, payload.Username, payload.Phone, payload.ProfilePicture, payload.IsActive)
 
-	// if err != nil {
-	// 	utils.WriteError(w, http.StatusBadRequest, err)
-	// 	return
-	// }
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
 
 	utils.WriteJSON(w, http.StatusCreated, map[string]string{"msg": fmt.Sprintf("User with id %d updated successfully", id)})
 }

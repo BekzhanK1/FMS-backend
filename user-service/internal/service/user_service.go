@@ -47,14 +47,11 @@ func (h *Service) GetUserById(id int) (*models.User, error) {
 	return user, nil
 }
 
-func (h *Service) UpdateUser(id int, email, username, phone, passwordHash string, isActive bool, role models.Role, profilePicture string) error {
+func (h *Service) UpdateUser(id int, username, phone, profilePicture string, isActive bool) error {
 	user := &models.User{
-		Email:          email,
 		Username:       username,
 		Phone:          phone,
-		PasswordHash:   passwordHash,
 		IsActive:       isActive,
-		Role:           role,
 		ProfilePicture: profilePicture,
 		UpdatedAt:      time.Now(),
 	}

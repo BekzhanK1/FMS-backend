@@ -13,12 +13,14 @@ type CreateUserPayload struct {
 	Email          string      `json:"email" validate:"required"`
 	Username       string      `json:"username" validate:"omitempty"`
 	Phone          string      `json:"phone" validate:"required"`
+	PasswordHash   string      `json:"password_hash" validate:"required"`
 	Role           models.Role `json:"role" validate:"required"`
 	ProfilePicture string      `json:"profile_picture" validate:"omitempty"`
 }
 
 type UpdateUserPayload struct {
-	Username       string      `json:"username" validate:"required"`
-	Phone          string      `json:"phone" validate:"required"`
-	ProfilePicture string      `json:"profile_picture" validate:"required"`
+	Username       string `json:"username" validate:"required"`
+	Phone          string `json:"phone" validate:"required"`
+	ProfilePicture string `json:"profile_picture" validate:"required"`
+	IsActive       bool   `json:"is_active" validate:"omit_empty"`
 }
