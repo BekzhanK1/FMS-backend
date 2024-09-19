@@ -1,12 +1,21 @@
 package types
 
-import "user-service/internal/models"
+import (
+	"time"
+	"user-service/internal/models"
+)
 
 type UserStore interface {
 	CreateUser(*models.User) error
 	DeleteUser(int) error
 	GetUserById(int) (*models.User, error)
 	UpdateUser(int, *models.User) error
+}
+
+type TokenStore interface {
+	GetTokenByUserId(int) (string, error)
+	CreateToken(*models.Token) error
+	UpdateTokenByUserId(int, *models.Token) error
 }
 
 type CreateUserPayload struct {
@@ -24,3 +33,17 @@ type UpdateUserPayload struct {
 	ProfilePicture string `json:"profile_picture" validate:"required"`
 	IsActive       bool   `json:"is_active" validate:"omit_empty"`
 }
+
+type CreateTokenPayload struct {
+	UserID     int
+	Token      string
+	Expiration time.Time
+	UpdatedAt  time.Time
+}
+
+type UpdateTokenPayload struct {
+	Token      string
+	Expiration time.Time
+	UpdatedAt  time.Time
+}
+

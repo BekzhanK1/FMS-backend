@@ -18,9 +18,8 @@ func NewStore(db *sql.DB) *Store {
 
 func (s *Store) CreateUser(user *models.User) error {
 	query := `
-		INSERT INTO Users (email, username, phone_number, password_hash, is_active, role, profile_picture_url, created_at, updated_at)
+		INSERT INTO users (email, username, phone_number, password_hash, is_active, role, profile_picture_url, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-		RETURNING id
 	`
 	_, err := s.db.Exec(query,
 		user.Email,

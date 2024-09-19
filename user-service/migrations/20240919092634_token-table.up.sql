@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS tokens (
+    id SERIAL PRIMARY KEY,
+    userId INT NOT NULL,
+    token VARCHAR(500),
+    expiration TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
