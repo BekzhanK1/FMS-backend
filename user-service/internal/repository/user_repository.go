@@ -22,7 +22,7 @@ func (s *Store) CreateUser(user *models.User) error {
 	if err != nil {
 		return fmt.Errorf("could not hash password: %w", err)
 	}
-	
+
 	query := `
 		INSERT INTO users (email, username, phone_number, password_hash, is_active, role, profile_picture_url, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
@@ -108,6 +108,35 @@ func (s *Store) DeleteUser(id int) error {
 	}
 
 	return nil
+}
+
+func (s *Store) GetUserByEmail(email string) (*models.User, error) {
+	query := `SELECT id, email, username, password_hash, phone_number, is_active, role, profile_picture_url, created_at, updated_at FROM users WHERE email = $1`
+
+	row := s.db.QueryRow(query, email)
+	
+	user := &models.User{}
+	err := row.Scan(
+		&user.ID,
+		&user.Email,
+		&user.Username,
+		&user.PasswordHash,
+		&user.Phone,
+		&user.IsActive,
+		&user.Role,
+		&user.ProfilePicture,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("could not get user: %w", err)
+	}
+
+	return user, nil
 }
 
 // func scanRowIntoUser(rows *sql.Rows) (*models.User, error) {

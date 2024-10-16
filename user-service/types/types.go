@@ -10,10 +10,11 @@ type UserStore interface {
 	DeleteUser(int) error
 	GetUserById(int) (*models.User, error)
 	UpdateUser(int, *models.User) error
+	GetUserByEmail(string) (*models.User, error)
 }
 
 type TokenStore interface {
-	GetTokenByUserId(int) (string, error)
+	GetTokenByUserId(int) (*models.Token, error)
 	CreateToken(*models.Token) error
 	UpdateTokenByUserId(int, *models.Token) error
 }
@@ -45,5 +46,10 @@ type UpdateTokenPayload struct {
 	Token      string
 	Expiration time.Time
 	UpdatedAt  time.Time
+}
+
+type LoginPayload struct {
+	Email    string `json:"email" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
 

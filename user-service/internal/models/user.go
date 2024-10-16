@@ -16,11 +16,11 @@ type User struct {
 	ID             int       `db:"id"`
 	Email          string    `db:"email"`
 	Username       string    `db:"username"`
-	Phone          string    `db:"phone"`
-	PasswordHash   string    `db:"password"`
+	Phone          string    `db:"phone_number"`
+	PasswordHash   string    `db:"password_hash"`
 	IsActive       bool      `db:"is_active"`
 	Role           Role      `db:"role"`
-	ProfilePicture string    `db:"profile_picture"`
+	ProfilePicture string    `db:"profile_picture_url"`
 	CreatedAt      time.Time `db:"created_at"`
 	UpdatedAt      time.Time `db:"updated_at"`
 }

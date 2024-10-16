@@ -22,7 +22,7 @@ func Run() {
 	r := mux.NewRouter()
 
 	userStore := userStore.NewStore(db)
-	userService := service.NewService(userStore)
+	userService := service.NewService(userStore, userStore)
 	userHandler := handler.NewHanlder(*userService)
 
 	userRouter := r.PathPrefix("/users").Subrouter()

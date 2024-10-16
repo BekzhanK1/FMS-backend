@@ -25,6 +25,7 @@ func NewHanlder(service service.Service) *Handler {
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("", h.CreateUserHandler).Methods(http.MethodPost)
+	router.HandleFunc("/login", h.LoginHandler).Methods(http.MethodPost)
 	router.HandleFunc("/{id}", h.GetUserHandler).Methods(http.MethodGet)
 	router.HandleFunc("/{id}", h.UpdateUserHandler).Methods(http.MethodPut)
 	router.HandleFunc("/{id}", h.DeleteUserHandler).Methods(http.MethodDelete)
@@ -148,3 +149,5 @@ func (h *Handler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+

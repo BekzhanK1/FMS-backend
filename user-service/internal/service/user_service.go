@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"log"
 	"time"
 	"user-service/internal/models"
@@ -9,11 +10,13 @@ import (
 
 type Service struct {
 	store types.UserStore
+	tokenStore types.TokenStore
 }
 
-func NewService(store types.UserStore) *Service {
+func NewService(store types.UserStore, tokenStore types.TokenStore) *Service {
 	return &Service{
-		store,
+		store:      store,
+		tokenStore: tokenStore,
 	}
 }
 
@@ -72,3 +75,14 @@ func (h *Service) DeleteUser(id int) error {
 
 	return nil
 }
+
+
+func (h *Service) GetUserByEmail(email string) (*models.User, error) {
+	user, err := h.store.GetUserByEmail(email)
+	if err != nil {
+		return nil, fmt.Errorf("user not found")
+	}
+	return user, nil
+}
+
+
