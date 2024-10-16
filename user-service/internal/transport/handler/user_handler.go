@@ -51,14 +51,17 @@ func (h *Handler) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.service.CreateUser(payload.Email, payload.Username, payload.Phone, payload.PasswordHash, false, payload.Role, payload.ProfilePicture)
+	_, err := h.service.CreateUser(payload.Email, payload.Username, payload.Phone, payload.Password, false, payload.Role, payload.ProfilePicture)
 
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusCreated, map[string]string{"msg": fmt.Sprintf("User with id %d created successfully", user.ID)})
+	if err := utils.WriteJSON(w, http.StatusCreated, map[string]string{"msg": "User created successfully"}); err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
 }
 
 func (h *Handler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -100,12 +103,12 @@ func (h *Handler) UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var payload types.UpdateUserPayload
-	if err := utils.ParseJSON(r, &payload); err != nil {
+	if err = utils.ParseJSON(r, &payload); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
 
-	if err := utils.Validate.Struct(payload); err != nil {
+	if err = utils.Validate.Struct(payload); err != nil {
 		errors := err.(validator.ValidationErrors)
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload: %v", errors))
 		return
@@ -118,7 +121,10 @@ func (h *Handler) UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusCreated, map[string]string{"msg": fmt.Sprintf("User with id %d updated successfully", id)})
+	if err = utils.WriteJSON(w, http.StatusCreated, map[string]string{"msg": fmt.Sprintf("User with id %d updated successfully", id)}); err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
 }
 
 func (h *Handler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -137,5 +143,8 @@ func (h *Handler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, map[string]string{"msg": "Deleted successfully"})
+	if err := utils.WriteJSON(w, http.StatusOK, map[string]string{"msg": "Deleted successfully"}); err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
 }

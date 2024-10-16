@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"user-service/internal/models"
+	"user-service/internal/utils"
 )
 
 type Store struct {
@@ -17,15 +18,20 @@ func NewStore(db *sql.DB) *Store {
 }
 
 func (s *Store) CreateUser(user *models.User) error {
+	hashedPassword, err := utils.HashPassword(user.PasswordHash)
+	if err != nil {
+		return fmt.Errorf("could not hash password: %w", err)
+	}
+	
 	query := `
 		INSERT INTO users (email, username, phone_number, password_hash, is_active, role, profile_picture_url, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 	`
-	_, err := s.db.Exec(query,
+	_, err = s.db.Exec(query,
 		user.Email,
 		user.Username,
 		user.Phone,
-		user.PasswordHash,
+		hashedPassword,
 		user.IsActive,
 		user.Role,
 		user.ProfilePicture,
