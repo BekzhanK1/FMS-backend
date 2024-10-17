@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 	"user-service/internal/config"
@@ -17,6 +18,8 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
+
+	log.Printf("LoginHandler: payload: %+v", payload)
 
 	user, err := h.service.GetUserByEmail(payload.Email)
 	if err != nil {

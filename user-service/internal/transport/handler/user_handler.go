@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"user-service/internal/middleware"
 	"user-service/internal/service"
 	"user-service/internal/utils"
 	"user-service/types"
@@ -29,6 +30,10 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/{id}", h.GetUserHandler).Methods(http.MethodGet)
 	router.HandleFunc("/{id}", h.UpdateUserHandler).Methods(http.MethodPut)
 	router.HandleFunc("/{id}", h.DeleteUserHandler).Methods(http.MethodDelete)
+	protected := router.PathPrefix("/api").Subrouter()
+	protected.Use(middleware.AuthMiddleware)
+	protected.HandleFunc("/hello", h.HelloWorld).Methods(http.MethodGet)
+	protected.HandleFunc("/profile", h.ProfileHandler).Methods(http.MethodGet)
 }
 
 func (h *Handler) HelloWorld(w http.ResponseWriter, r *http.Request) {
@@ -145,6 +150,31 @@ func (h *Handler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := utils.WriteJSON(w, http.StatusOK, map[string]string{"msg": "Deleted successfully"}); err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+}
+
+func (h *Handler) ProfileHandler(w http.ResponseWriter, r *http.Request) {
+	userIDstr, ok := r.Context().Value(middleware.UserKey).(string)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, fmt.Errorf("unable to get user ID from context"))
+		return 
+	}
+
+	userID, err := strconv.Atoi(userIDstr)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+	
+	user, err := h.service.GetUserById(userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err = utils.WriteJSON(w, http.StatusOK, user); err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
