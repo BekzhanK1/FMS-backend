@@ -5,18 +5,21 @@ import (
 	"log"
 	"time"
 	"user-service/internal/models"
+	"user-service/internal/utils"
 	"user-service/types"
 )
 
 type Service struct {
 	store types.UserStore
 	tokenStore types.TokenStore
+	otpStore types.OTPStore
 }
 
-func NewService(store types.UserStore, tokenStore types.TokenStore) *Service {
+func NewService(store types.UserStore, tokenStore types.TokenStore, otpStore types.OTPStore ) *Service {
 	return &Service{
 		store:      store,
 		tokenStore: tokenStore,
+		otpStore: otpStore,
 	}
 }
 
@@ -33,9 +36,16 @@ func (h *Service) CreateUser(email, username, phone, passwordHash string, isActi
 		UpdatedAt:      time.Now(),
 	}
 
-	if err := h.store.CreateUser(user); err != nil {
+	userId, err := h.store.CreateUser(user)
+	if err != nil {
 		return nil, err
 	}
+
+	OtpCode, err := h.otpStore.CreateOTP(userId)
+	if err != nil {
+		return nil, err
+	}
+	utils.SendEmail(email, "OTPCode", OtpCode)
 
 	return user, nil
 }

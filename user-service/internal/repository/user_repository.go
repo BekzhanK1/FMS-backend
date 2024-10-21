@@ -17,17 +17,19 @@ func NewStore(db *sql.DB) *Store {
 	}
 }
 
-func (s *Store) CreateUser(user *models.User) error {
+func (s *Store) CreateUser(user *models.User) (int, error) {
 	hashedPassword, err := utils.HashPassword(user.PasswordHash)
 	if err != nil {
-		return fmt.Errorf("could not hash password: %w", err)
+		return 0, fmt.Errorf("could not hash password: %w", err)
 	}
 
 	query := `
 		INSERT INTO users (email, username, phone_number, password_hash, is_active, role, profile_picture_url, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		RETURNING id
 	`
-	_, err = s.db.Exec(query,
+	var userID int
+	err = s.db.QueryRow(query,
 		user.Email,
 		user.Username,
 		user.Phone,
@@ -37,13 +39,13 @@ func (s *Store) CreateUser(user *models.User) error {
 		user.ProfilePicture,
 		user.CreatedAt,
 		user.UpdatedAt,
-	)
+	).Scan(&userID)
 
 	if err != nil {
-		return fmt.Errorf("could not create user: %w", err)
+		return 0, fmt.Errorf("could not create user: %w", err)
 	}
 
-	return nil
+	return userID, nil
 }
 
 func (s *Store) GetUserById(id int) (*models.User, error) {

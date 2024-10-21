@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 	"strconv"
 
@@ -16,12 +17,18 @@ type Config struct {
 	JWTSecret          string
 	JwtExpAccessToken  int64
 	JwtExpRefreshToken int64
+	MailUsername	   string
+	MailPassword 	   string
+	MailPort		   int64
+	MailServer		   string
 }
 
 var Envs = Load()
 
 func Load() Config {
-	godotenv.Load()
+	if err := godotenv.Load(); err != nil {
+		log.Printf("Error loading .env file: %v", err)
+	}
 
 	return Config{
 		DBHost:             getEnv("PUBLIC_HOST", "localhost"),
@@ -32,6 +39,11 @@ func Load() Config {
 		JWTSecret:          getEnv("JWT_SECRET", "not-so-secret-now-is-it?"),
 		JwtExpAccessToken:  getEnvAsInt("JWT_ACCESS_TOKEN_EXP", 60*5),
 		JwtExpRefreshToken: getEnvAsInt("JWT_REFRESH_TOKEN_EXP", 60*60*24*7),
+		MailUsername:	   getEnv("MAIL_USERNAME", "bkimadieff@gmail.com"),
+		MailPassword:	   getEnv("MAIL_PASSWORD", "password"),
+		MailPort:		   getEnvAsInt("MAIL_PORT", 587),
+		MailServer:		   getEnv("MAIL_SERVER", "smtp.gmail.com"),
+
 	}
 }
 

@@ -6,7 +6,7 @@ import (
 )
 
 type UserStore interface {
-	CreateUser(*models.User) error
+	CreateUser(*models.User) (int, error)
 	DeleteUser(int) error
 	GetUserById(int) (*models.User, error)
 	UpdateUser(int, *models.User) error
@@ -18,6 +18,13 @@ type TokenStore interface {
 	CreateToken(*models.Token) error
 	UpdateTokenByUserId(int, *models.Token) error
 }
+
+type OTPStore interface {
+	CreateOTP(int) (string, error)
+	DeleteOTP(int) (error)
+	RegenerateOTP(int, string) (error)
+}
+	
 
 type CreateUserPayload struct {
 	Email          string      `json:"email" validate:"required"`

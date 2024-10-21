@@ -23,12 +23,17 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.service.GetUserByEmail(payload.Email)
 	if err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, err) // User not found or another error
+		utils.WriteError(w, http.StatusUnauthorized, err)
 		return
 	}
 
 	if utils.CheckPasswordHash(payload.Password, user.PasswordHash) != nil{
 		utils.WriteError(w, http.StatusUnauthorized, fmt.Errorf("invalid email or password"))
+		return
+	}
+	
+	if !user.IsActive{
+		utils.WriteError(w, http.StatusUnauthorized, fmt.Errorf("user is not active"))
 		return
 	}
 
@@ -68,3 +73,4 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
