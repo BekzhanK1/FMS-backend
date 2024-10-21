@@ -15,3 +15,7 @@ migrate-up:
 
 migrate-down:
 	go run cmd/migrate/main.go down
+
+migrate-down-up:
+	go run cmd/migrate/main.go down
+	go run cmd/migrate/main.go up

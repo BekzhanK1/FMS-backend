@@ -21,6 +21,7 @@ type Config struct {
 	MailPassword 	   string
 	MailPort		   int64
 	MailServer		   string
+	CryptoKey		   string
 }
 
 var Envs = Load()
@@ -39,11 +40,11 @@ func Load() Config {
 		JWTSecret:          getEnv("JWT_SECRET", "not-so-secret-now-is-it?"),
 		JwtExpAccessToken:  getEnvAsInt("JWT_ACCESS_TOKEN_EXP", 60*5),
 		JwtExpRefreshToken: getEnvAsInt("JWT_REFRESH_TOKEN_EXP", 60*60*24*7),
-		MailUsername:	   getEnv("MAIL_USERNAME", "bkimadieff@gmail.com"),
-		MailPassword:	   getEnv("MAIL_PASSWORD", "password"),
-		MailPort:		   getEnvAsInt("MAIL_PORT", 587),
-		MailServer:		   getEnv("MAIL_SERVER", "smtp.gmail.com"),
-
+		MailUsername:	    getEnv("MAIL_USERNAME", "bkimadieff@gmail.com"),
+		MailPassword:	    getEnv("MAIL_PASSWORD", "password"),
+		MailPort:		    getEnvAsInt("MAIL_PORT", 587),
+		MailServer:		    getEnv("MAIL_SERVER", "smtp.gmail.com"),
+		CryptoKey: 		    getEnv("CRYPTO_KEY", "12345678901234567890123456789012"),
 	}
 }
 

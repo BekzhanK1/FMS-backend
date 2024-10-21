@@ -17,10 +17,10 @@ func NewStore(db *sql.DB) *Store {
 	}
 }
 
-func (s *Store) CreateUser(user *models.User) (int, error) {
+func (s *Store) CreateUser(user *models.User) (*models.User, error) {
 	hashedPassword, err := utils.HashPassword(user.PasswordHash)
 	if err != nil {
-		return 0, fmt.Errorf("could not hash password: %w", err)
+		return &models.User{}, fmt.Errorf("could not hash password: %w", err)
 	}
 
 	query := `
@@ -42,11 +42,13 @@ func (s *Store) CreateUser(user *models.User) (int, error) {
 	).Scan(&userID)
 
 	if err != nil {
-		return 0, fmt.Errorf("could not create user: %w", err)
+		return &models.User{}, fmt.Errorf("could not create user: %w", err)
 	}
 
-	return userID, nil
+	user.ID = userID
+	return user, nil
 }
+
 
 func (s *Store) GetUserById(id int) (*models.User, error) {
 	query := `SELECT id, email, username, phone_number, is_active, role, profile_picture_url, created_at, updated_at FROM users WHERE id = $1`
@@ -141,24 +143,53 @@ func (s *Store) GetUserByEmail(email string) (*models.User, error) {
 	return user, nil
 }
 
-// func scanRowIntoUser(rows *sql.Rows) (*models.User, error) {
-// 	user := new(models.User)
+func (s *Store) ActivateUser(encryptedEmail string, otpCode string) error {
+	userEmail, err := utils.Decrypt(encryptedEmail)
+	if err != nil {
+		return fmt.Errorf("could not decrypt email: %w", err)
+	}
 
-// 	err := rows.Scan(
-// 		&user.Email,
-// 		&user.Username,
-// 		&user.Phone,
-// 		&user.PasswordHash,
-// 		&user.IsActive,
-// 		&user.Role,
-// 		&user.ProfilePicture,
-// 		&user.UpdatedAt,
-// 		&user.ID,
-// 	)
+	user, err := s.GetUserByEmail(userEmail)
 
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	if user.IsActive{
+		return fmt.Errorf("user is already activated: %w", err)
+	}
 
-// 	return user, nil
-// }
+	otp, err := s.GetOTPByUserId(user.ID)
+	if err != nil {
+		return fmt.Errorf("could not get token: %w", err)
+	}
+
+	if otp.ExpiresAt.Before(utils.GetCurrentTime()) {
+		newOtpCode := utils.GenerateOTP()
+		err = s.RegenerateOTP(user.ID, newOtpCode)
+		if err != nil {
+			return fmt.Errorf("couldn't regenerate OTP: %w", err)
+		}
+
+		utils.SendEmail(user.Email, "OTP Code", newOtpCode)
+
+		return fmt.Errorf("OTP is expired, a new OTP has been sent to email %s", user.Email)
+	}
+
+	fmt.Printf("otpCode: %s, otp.OTP_Code: %s\n", otpCode, otp.OTP_Code)
+
+	if otpCode != otp.OTP_Code {
+		return fmt.Errorf("invalid OTP code")
+	}
+
+	query := `UPDATE users SET is_active = true WHERE id = $1`
+	_, err = s.db.Exec(query, user.ID)
+	if err != nil {
+		return fmt.Errorf("could not activate user: %w", err)
+	}
+
+	err = s.DeleteOTP(user.ID)
+	if err != nil {
+		return fmt.Errorf("could not delete OTP: %w", err)
+	}
+
+	return nil
+
+}
+

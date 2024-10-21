@@ -30,9 +30,9 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/{id}", h.GetUserHandler).Methods(http.MethodGet)
 	router.HandleFunc("/{id}", h.UpdateUserHandler).Methods(http.MethodPut)
 	router.HandleFunc("/{id}", h.DeleteUserHandler).Methods(http.MethodDelete)
+	router.HandleFunc("/activate", h.ActivateUserHandler).Methods(http.MethodPost)
 	protected := router.PathPrefix("/api").Subrouter()
 	protected.Use(middleware.AuthMiddleware)
-	protected.HandleFunc("/hello", h.HelloWorld).Methods(http.MethodGet)
 	protected.HandleFunc("/profile", h.ProfileHandler).Methods(http.MethodGet)
 }
 
@@ -57,14 +57,14 @@ func (h *Handler) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := h.service.CreateUser(payload.Email, payload.Username, payload.Phone, payload.Password, false, payload.Role, payload.ProfilePicture)
+	encryptedEmail, err := h.service.CreateUser(payload.Email, payload.Username, payload.Phone, payload.Password, false, payload.Role, payload.ProfilePicture)
 
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	if err := utils.WriteJSON(w, http.StatusCreated, map[string]string{"msg": "User created successfully"}); err != nil {
+	if err := utils.WriteJSON(w, http.StatusCreated, map[string]string{"msg": "User created successfully", "key": encryptedEmail}); err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -155,14 +155,10 @@ func (h *Handler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) ProfileHandler(w http.ResponseWriter, r *http.Request) {
-	userIDstr, ok := r.Context().Value(middleware.UserKey).(string)
-	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, fmt.Errorf("unable to get user ID from context"))
-		return 
-	}
 
-	userID, err := strconv.Atoi(userIDstr)
+
+func (h *Handler) ProfileHandler(w http.ResponseWriter, r *http.Request) {
+	userID, err := getUserIDFromContext(r)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
@@ -180,4 +176,16 @@ func (h *Handler) ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+
+func getUserIDFromContext(r *http.Request) (int, error) {
+	userIdstr, ok := r.Context().Value(middleware.UserKey).(string)
+	if !ok {
+		return 0, fmt.Errorf("unable to get user ID from context")
+	}
+	userId, err := strconv.Atoi(userIdstr)
+	if err != nil {
+		return 0, err
+	}
+	return userId, nil	
+}
 

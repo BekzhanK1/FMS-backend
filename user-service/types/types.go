@@ -6,11 +6,12 @@ import (
 )
 
 type UserStore interface {
-	CreateUser(*models.User) (int, error)
+	CreateUser(*models.User) (*models.User, error)
 	DeleteUser(int) error
 	GetUserById(int) (*models.User, error)
 	UpdateUser(int, *models.User) error
 	GetUserByEmail(string) (*models.User, error)
+	ActivateUser(string, string) error
 }
 
 type TokenStore interface {
@@ -20,8 +21,9 @@ type TokenStore interface {
 }
 
 type OTPStore interface {
-	CreateOTP(int) (string, error)
+	CreateOTP(*models.User) (string, string, error)
 	DeleteOTP(int) (error)
+	GetOTPByUserId(int) (*models.OTP, error)
 	RegenerateOTP(int, string) (error)
 }
 	

@@ -23,8 +23,12 @@ func NewService(store types.UserStore, tokenStore types.TokenStore, otpStore typ
 	}
 }
 
-func (h *Service) CreateUser(email, username, phone, passwordHash string, isActive bool, role models.Role, profilePicture string) (*models.User, error) {
-	user := &models.User{
+func (h *Service) CreateUser(email, username, phone, passwordHash string, isActive bool, role models.Role, profilePicture string) (string, error) {
+	if role == models.Admin {
+		return "", fmt.Errorf("cannot create admin user")
+	}
+	
+	userObject := &models.User{
 		Email:          email,
 		Username:       username,
 		Phone:          phone,
@@ -36,18 +40,18 @@ func (h *Service) CreateUser(email, username, phone, passwordHash string, isActi
 		UpdatedAt:      time.Now(),
 	}
 
-	userId, err := h.store.CreateUser(user)
+	user, err := h.store.CreateUser(userObject)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	OtpCode, err := h.otpStore.CreateOTP(userId)
+	OtpCode, encryptedEmail, err := h.otpStore.CreateOTP(user)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	utils.SendEmail(email, "OTPCode", OtpCode)
+	utils.SendEmail(email, "Your OTP: %s", OtpCode)
 
-	return user, nil
+	return encryptedEmail, nil
 }
 
 func (h *Service) GetUserById(id int) (*models.User, error) {
@@ -93,6 +97,15 @@ func (h *Service) GetUserByEmail(email string) (*models.User, error) {
 		return nil, fmt.Errorf("user not found")
 	}
 	return user, nil
+}
+
+
+func (h *Service) ActivateUser(encryptedEmail, otpCode string) error {
+	err := h.store.ActivateUser(encryptedEmail, otpCode)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 
