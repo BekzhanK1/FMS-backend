@@ -25,9 +25,10 @@ type Config struct {
 }
 
 var Envs = Load()
+var AdminConfig = LoadAdminUserConfig()
 
 func Load() Config {
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Overload(); err != nil {
 		log.Printf("Error loading .env file: %v", err)
 	}
 
@@ -45,6 +46,22 @@ func Load() Config {
 		MailPort:		    getEnvAsInt("MAIL_PORT", 587),
 		MailServer:		    getEnv("MAIL_SERVER", "smtp.gmail.com"),
 		CryptoKey: 		    getEnv("CRYPTO_KEY", "12345678901234567890123456789012"),
+	}
+}
+
+type AdminUserConfiguration struct {
+	Email    string
+	Username string
+	Phone    string
+	Password string
+}
+
+func LoadAdminUserConfig() *AdminUserConfiguration {		
+	return &AdminUserConfiguration{
+		Email:   getEnv("ADMIN_EMAIL", "admin@gmail.com"),
+		Username: getEnv("ADMIN_USERNAME", "admin"),
+		Phone:   getEnv("ADMIN_PHONE", "+77775556655"),
+		Password: getEnv("ADMIN_PASSWORD", "qwerty"),
 	}
 }
 

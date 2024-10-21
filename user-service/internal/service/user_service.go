@@ -27,13 +27,13 @@ func (h *Service) CreateUser(email, username, phone, passwordHash string, isActi
 	if role == models.Admin {
 		return "", fmt.Errorf("cannot create admin user")
 	}
-	
+
 	userObject := &models.User{
 		Email:          email,
 		Username:       username,
 		Phone:          phone,
 		PasswordHash:   passwordHash,
-		IsActive:       isActive,
+		IsActive:       false,
 		Role:           role,
 		ProfilePicture: profilePicture,
 		CreatedAt:      time.Now(),
