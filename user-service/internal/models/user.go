@@ -16,6 +16,8 @@ type User struct {
 	ID             int       `db:"id"`
 	Email          string    `db:"email"`
 	Username       string    `db:"username"`
+	FirstName      string	 `db:"first_name"`
+	LastName       string	 `db:"last_name"`
 	Phone          string    `db:"phone_number"`
 	PasswordHash   string    `db:"password_hash"`
 	IsActive       bool      `db:"is_active"`

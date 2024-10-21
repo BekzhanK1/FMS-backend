@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS farmer_info;
+DROP TABLE IF EXISTS buyer_info;
+DROP TABLE IF EXISTS socials;

@@ -57,7 +57,7 @@ func (h *Handler) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	encryptedEmail, err := h.service.CreateUser(payload.Email, payload.Username, payload.Phone, payload.Password, false, payload.Role, payload.ProfilePicture)
+	encryptedEmail, err := h.service.CreateUser(payload.Email, payload.Username, payload.FirstName, payload.LastName, payload.Phone, payload.Password, false, payload.Role, payload.ProfilePicture)
 
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)

@@ -24,14 +24,16 @@ func (s *Store) CreateUser(user *models.User) (*models.User, error) {
 	}
 
 	query := `
-		INSERT INTO users (email, username, phone_number, password_hash, is_active, role, profile_picture_url, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		INSERT INTO users (email, username, first_name, last_name, phone_number, password_hash, is_active, role, profile_picture_url, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		RETURNING id
 	`
 	var userID int
 	err = s.db.QueryRow(query,
 		user.Email,
 		user.Username,
+		user.FirstName,
+		user.LastName,
 		user.Phone,
 		hashedPassword,
 		user.IsActive,
@@ -50,8 +52,9 @@ func (s *Store) CreateUser(user *models.User) (*models.User, error) {
 }
 
 
+
 func (s *Store) GetUserById(id int) (*models.User, error) {
-	query := `SELECT id, email, username, phone_number, is_active, role, profile_picture_url, created_at, updated_at FROM users WHERE id = $1`
+	query := `SELECT id, email, username, first_name, last_name, phone_number, is_active, role, profile_picture_url, created_at, updated_at FROM users WHERE id = $1`
 
 	row := s.db.QueryRow(query, id)
 	
@@ -60,6 +63,8 @@ func (s *Store) GetUserById(id int) (*models.User, error) {
 		&user.ID,
 		&user.Email,
 		&user.Username,
+		&user.FirstName,
+		&user.LastName,
 		&user.Phone,
 		&user.IsActive,
 		&user.Role,
@@ -81,12 +86,14 @@ func (s *Store) GetUserById(id int) (*models.User, error) {
 func (s *Store) UpdateUser(userId int, user *models.User) error {
 	query := `
 		UPDATE users
-		SET email = $1, username = $2, phone = $3, password_hash = $4, is_active = $5, role = $6, profile_picture = $7, updated_at = $8
-		WHERE id = $9
+		SET email = $1, username = $2, first_name = $3, last_name = $4, phone = $5, password_hash = $6, is_active = $7, role = $8, profile_picture = $9, updated_at = $10
+		WHERE id = $11
 	`
 	_, err := s.db.Exec(query,
 		user.Email,
 		user.Username,
+		user.FirstName,
+		user.LastName,
 		user.Phone,
 		user.PasswordHash,
 		user.IsActive,
@@ -103,6 +110,7 @@ func (s *Store) UpdateUser(userId int, user *models.User) error {
 	return nil
 }
 
+
 func (s *Store) DeleteUser(id int) error {
 	query := `DELETE FROM users WHERE id = $1`
 
@@ -115,7 +123,7 @@ func (s *Store) DeleteUser(id int) error {
 }
 
 func (s *Store) GetUserByEmail(email string) (*models.User, error) {
-	query := `SELECT id, email, username, password_hash, phone_number, is_active, role, profile_picture_url, created_at, updated_at FROM users WHERE email = $1`
+	query := `SELECT id, email, username, first_name, last_name, password_hash, phone_number, is_active, role, profile_picture_url, created_at, updated_at FROM users WHERE email = $1`
 
 	row := s.db.QueryRow(query, email)
 	
@@ -124,6 +132,8 @@ func (s *Store) GetUserByEmail(email string) (*models.User, error) {
 		&user.ID,
 		&user.Email,
 		&user.Username,
+		&user.FirstName,
+		&user.LastName,
 		&user.PasswordHash,
 		&user.Phone,
 		&user.IsActive,
@@ -142,6 +152,7 @@ func (s *Store) GetUserByEmail(email string) (*models.User, error) {
 
 	return user, nil
 }
+
 
 func (s *Store) ActivateUser(encryptedEmail string, otpCode string) error {
 	userEmail, err := utils.Decrypt(encryptedEmail)

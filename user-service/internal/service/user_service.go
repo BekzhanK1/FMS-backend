@@ -23,7 +23,7 @@ func NewService(store types.UserStore, tokenStore types.TokenStore, otpStore typ
 	}
 }
 
-func (h *Service) CreateUser(email, username, phone, passwordHash string, isActive bool, role models.Role, profilePicture string) (string, error) {
+func (h *Service) CreateUser(email, username, first_name, last_name, phone, passwordHash string, isActive bool, role models.Role, profilePicture string) (string, error) {
 	if role == models.Admin {
 		return "", fmt.Errorf("cannot create admin user")
 	}
@@ -31,6 +31,8 @@ func (h *Service) CreateUser(email, username, phone, passwordHash string, isActi
 	userObject := &models.User{
 		Email:          email,
 		Username:       username,
+		FirstName:      first_name,
+		LastName:       last_name,
 		Phone:          phone,
 		PasswordHash:   passwordHash,
 		IsActive:       false,

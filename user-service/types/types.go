@@ -31,8 +31,10 @@ type OTPStore interface {
 type CreateUserPayload struct {
 	Email          string      `json:"email" validate:"required"`
 	Username       string      `json:"username" validate:"omitempty"`
+	FirstName      string      `json:"first_name" validate:"omitempty"`
+	LastName       string      `json:"last_name" validate:"omitempty"`
 	Phone          string      `json:"phone" validate:"required"`
-	Password   string      `json:"password" validate:"required"`
+	Password   	   string      `json:"password" validate:"required"`
 	Role           models.Role `json:"role" validate:"required,oneof=Farmer Buyer Admin"`
 	ProfilePicture string      `json:"profile_picture" validate:"omitempty"`
 }
