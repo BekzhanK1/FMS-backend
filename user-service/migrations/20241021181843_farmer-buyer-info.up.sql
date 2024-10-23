@@ -1,5 +1,8 @@
 CREATE TABLE IF NOT EXISTS farmer_info (
     farmer_id INT PRIMARY KEY,
+    rating FLOAT DEFAULT 0,
+    experience INT,
+    bio TEXT,
     is_verified BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (farmer_id) REFERENCES users (id) ON DELETE CASCADE
 );

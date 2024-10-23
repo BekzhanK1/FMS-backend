@@ -13,13 +13,15 @@ type Service struct {
 	store types.UserStore
 	tokenStore types.TokenStore
 	otpStore types.OTPStore
+	farmerInfoStore types.FarmerInfoStore
 }
 
-func NewService(store types.UserStore, tokenStore types.TokenStore, otpStore types.OTPStore ) *Service {
+func NewService(store types.UserStore, tokenStore types.TokenStore, otpStore types.OTPStore, farmerInfoStore types.FarmerInfoStore ) *Service {
 	return &Service{
 		store:      store,
 		tokenStore: tokenStore,
 		otpStore: otpStore,
+		farmerInfoStore: farmerInfoStore,
 	}
 }
 
@@ -45,6 +47,20 @@ func (h *Service) CreateUser(email, username, first_name, last_name, phone, pass
 	user, err := h.store.CreateUser(userObject)
 	if err != nil {
 		return "", err
+	}
+
+	if user.Role == models.Farmer{
+		farmerInfo := &models.FarmerInfo{
+			FarmerID: user.ID,
+			Rating: 0.0,
+			Experience: 0,
+			Bio: "",
+			IsVerified: false,
+		}
+		err = h.farmerInfoStore.CreateFarmerInfo(farmerInfo)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	OtpCode, encryptedEmail, err := h.otpStore.CreateOTP(user)

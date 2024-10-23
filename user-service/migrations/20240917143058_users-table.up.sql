@@ -1,4 +1,11 @@
-CREATE TYPE role_type AS ENUM ('Farmer', 'Buyer', 'Admin');
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'role_type') THEN
+        CREATE TYPE role_type AS ENUM ('Farmer', 'Buyer', 'Admin');
+    END IF;
+END
+$$;
+
 
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,

@@ -26,6 +26,13 @@ type OTPStore interface {
 	GetOTPByUserId(int) (*models.OTP, error)
 	RegenerateOTP(int, string) (error)
 }
+
+type FarmerInfoStore interface {
+	CreateFarmerInfo(*models.FarmerInfo) error
+	UpdateFarmerInfo(*models.FarmerInfo) error
+	GetFarmerInfoByFarmerId(int) (*models.FarmerInfo, error)
+	DeleteFarmerInfo(int) error
+}
 	
 
 type CreateUserPayload struct {

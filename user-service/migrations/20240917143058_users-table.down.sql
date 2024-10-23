@@ -1,2 +1,3 @@
+ALTER TABLE documents DROP CONSTRAINT IF EXISTS documents_user_id_fkey;
 DROP TABLE IF EXISTS users;
-DROP TYPE IF EXISTS role_type;
+DROP TYPE IF EXISTS role_type CASCADE;
