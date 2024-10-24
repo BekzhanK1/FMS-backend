@@ -11,7 +11,6 @@ type UserStore interface {
 	GetUserById(int) (*models.User, error)
 	UpdateUser(int, *models.User) error
 	GetUserByEmail(string) (*models.User, error)
-	ActivateUser(string, string) error
 }
 
 type TokenStore interface {
@@ -64,6 +63,11 @@ type UpdateTokenPayload struct {
 	Token      string
 	Expiration time.Time
 	UpdatedAt  time.Time
+}
+
+type Tokens struct {
+	AccessToken  string
+	RefreshToken string
 }
 
 type LoginPayload struct {

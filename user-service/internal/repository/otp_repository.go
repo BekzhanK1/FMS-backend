@@ -7,19 +7,29 @@ import (
 	"user-service/internal/utils"
 )
 
-func (s *Store) CreateOTP(user *models.User) (string, string, error) {
+type OTPStore struct {
+	db *sql.DB
+}
+
+func NewOTPStore(db *sql.DB) *OTPStore {
+	return &OTPStore{
+		db: db,
+	}
+}
+
+func (s *OTPStore) CreateOTP(user *models.User) (string, string, error) {
 	encryptedEmail, err := utils.Encrypt(user.Email)
 	if err != nil {
 		return "", "", fmt.Errorf("could not encrypt email: %w", err)
 	}
 	otp := &models.OTP{
-		UserID:  user.ID,
+		UserID:   user.ID,
 		OTP_Code: utils.GenerateOTP(),
 	}
 
 	query := `
-	INSERT INTO otp (user_id, otp_code)
-	VALUES ($1, $2)
+		INSERT INTO otp (user_id, otp_code)
+		VALUES ($1, $2)
 	`
 	_, err = s.db.Exec(query, otp.UserID, otp.OTP_Code)
 
@@ -30,10 +40,10 @@ func (s *Store) CreateOTP(user *models.User) (string, string, error) {
 	return otp.OTP_Code, encryptedEmail, nil
 }
 
-func (s *Store) DeleteOTP(userId int) error {
+func (s *OTPStore) DeleteOTP(userId int) error {
 	query := `
-	DELETE FROM otp
-	WHERE user_id = $1
+		DELETE FROM otp
+		WHERE user_id = $1
 	`
 	_, err := s.db.Exec(query, userId)
 
@@ -44,11 +54,11 @@ func (s *Store) DeleteOTP(userId int) error {
 	return nil
 }
 
-func (s *Store) GetOTPByUserId(userId int) (*models.OTP, error) {
+func (s *OTPStore) GetOTPByUserId(userId int) (*models.OTP, error) {
 	query := `
-	SELECT user_id, otp_code, expires_at
-	FROM otp
-	WHERE user_id = $1
+		SELECT user_id, otp_code, expires_at
+		FROM otp
+		WHERE user_id = $1
 	`
 	row := s.db.QueryRow(query, userId)
 
@@ -69,12 +79,11 @@ func (s *Store) GetOTPByUserId(userId int) (*models.OTP, error) {
 	return otp, nil
 }
 
-
-func (s *Store) RegenerateOTP(user_id int, otp_code string) error {
+func (s *OTPStore) RegenerateOTP(user_id int, otp_code string) error {
 	query := `
-	UPDATE otp
-	SET otp_code = $2, expires_at = CURRENT_TIMESTAMP + INTERVAL '10 minutes'
-	WHERE user_id = $1
+		UPDATE otp
+		SET otp_code = $2, expires_at = CURRENT_TIMESTAMP + INTERVAL '10 minutes'
+		WHERE user_id = $1
 	`
 	_, err := s.db.Exec(query, user_id, otp_code)
 

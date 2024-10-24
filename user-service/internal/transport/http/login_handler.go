@@ -1,4 +1,4 @@
-package handler
+package http
 
 import (
 	"fmt"
@@ -7,9 +7,10 @@ import (
 	"time"
 	"user-service/internal/config"
 	"user-service/internal/models"
-	"user-service/internal/service"
 	"user-service/internal/utils"
 	"user-service/types"
+	
+	authService "user-service/internal/service/auth"
 )
 
 func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +22,7 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("LoginHandler: payload: %+v", payload)
 
-	user, err := h.service.GetUserByEmail(payload.Email)
+	user, err := h.userService.GetUserByEmail(payload.Email)
 	if err != nil {
 		utils.WriteError(w, http.StatusUnauthorized, err)
 		return
@@ -44,7 +45,7 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokens, err := service.CreateJWT(user.ID)
+	tokens, err := authService.CreateJWT(user.ID)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
@@ -57,19 +58,19 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
         UpdatedAt:  time.Now(),
     }
 
-	existingToken, err := h.service.GetTokenByUserId(user.ID)
+	existingToken, err := h.authService.GetTokenByUserId(user.ID)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	if existingToken == nil {
-		if err := h.service.CreateToken(token); err != nil {
+		if err := h.authService.CreateToken(token); err != nil {
 			utils.WriteError(w, http.StatusInternalServerError, err)
 			return
 		}
 	} else {
-		if err := h.service.UpdateTokenByUserId(user.ID, token); err != nil {
+		if err := h.authService.UpdateTokenByUserId(user.ID, token); err != nil {
 			utils.WriteError(w, http.StatusInternalServerError, err)
 			return
 		}

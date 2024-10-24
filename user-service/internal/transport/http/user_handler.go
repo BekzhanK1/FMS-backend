@@ -1,4 +1,4 @@
-package handler
+package http
 
 import (
 	"encoding/json"
@@ -6,35 +6,12 @@ import (
 	"net/http"
 	"strconv"
 	"user-service/internal/middleware"
-	"user-service/internal/service"
 	"user-service/internal/utils"
 	"user-service/types"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 )
-
-type Handler struct {
-	service service.Service
-}
-
-func NewHanlder(service service.Service) *Handler {
-	return &Handler{
-		service,
-	}
-}
-
-func (h *Handler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("", h.CreateUserHandler).Methods(http.MethodPost)
-	router.HandleFunc("/login", h.LoginHandler).Methods(http.MethodPost)
-	router.HandleFunc("/{id}", h.GetUserHandler).Methods(http.MethodGet)
-	router.HandleFunc("/{id}", h.UpdateUserHandler).Methods(http.MethodPut)
-	router.HandleFunc("/{id}", h.DeleteUserHandler).Methods(http.MethodDelete)
-	router.HandleFunc("/activate", h.ActivateUserHandler).Methods(http.MethodPost)
-	protected := router.PathPrefix("/api").Subrouter()
-	protected.Use(middleware.AuthMiddleware)
-	protected.HandleFunc("/profile", h.ProfileHandler).Methods(http.MethodGet)
-}
 
 func (h *Handler) HelloWorld(w http.ResponseWriter, r *http.Request) {
 	_, err := w.Write([]byte("Hello, World!"))
@@ -57,7 +34,7 @@ func (h *Handler) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	encryptedEmail, err := h.service.CreateUser(payload.Email, payload.Username, payload.FirstName, payload.LastName, payload.Phone, payload.Password, false, payload.Role, payload.ProfilePicture)
+	encryptedEmail, err := h.userService.CreateUser(payload.Email, payload.Username, payload.FirstName, payload.LastName, payload.Phone, payload.Password, false, payload.Role, payload.ProfilePicture)
 
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
@@ -80,7 +57,7 @@ func (h *Handler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.service.GetUserById(id)
+	user, err := h.userService.GetUserById(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -120,7 +97,7 @@ func (h *Handler) UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.service.UpdateUser(id, payload.Username, payload.Phone, payload.ProfilePicture, payload.IsActive)
+	err = h.userService.UpdateUser(id, payload.Username, payload.Phone, payload.ProfilePicture, payload.IsActive)
 
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
@@ -144,7 +121,7 @@ func (h *Handler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	id, _ := strconv.Atoi(idStr)
 
-	if err := h.service.DeleteUser(id); err != nil {
+	if err := h.userService.DeleteUser(id); err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -164,7 +141,7 @@ func (h *Handler) ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	user, err := h.service.GetUserById(userID)
+	user, err := h.userService.GetUserById(userID)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return

@@ -1,4 +1,4 @@
-package handler
+package http
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ func (h *Handler) ActivateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("ActivateUserHandler: encryptedEmail: %s, otpCode: %s\n", encryptedEmail, otpCode)
 
-	err = h.service.ActivateUser(encryptedEmail, otpCode)
+	err = h.userService.ActivateUser(encryptedEmail, otpCode)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
