@@ -11,7 +11,6 @@ type UserStore interface {
 	GetUserById(int) (*models.User, error)
 	UpdateUser(int, *models.User) error
 	GetUserByEmail(string) (*models.User, error)
-	ActivateUser(string, string) error
 }
 
 type TokenStore interface {
