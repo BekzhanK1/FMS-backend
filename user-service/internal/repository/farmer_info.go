@@ -1,11 +1,22 @@
 package repository
 
 import (
+	"database/sql"
 	"fmt"
 	"user-service/internal/models"
 )
 
-func (s *Store) CreateFarmerInfo(farmerInfo *models.FarmerInfo) error {
+type FarmerInfoStore struct {
+	db *sql.DB
+}
+
+func NewFarmerInfoStore(db *sql.DB) *FarmerInfoStore {
+	return &FarmerInfoStore{
+		db: db,
+	}
+}
+
+func (s *FarmerInfoStore) CreateFarmerInfo(farmerInfo *models.FarmerInfo) error {
 	query := `INSERT INTO farmer_info (farmer_id, rating, experience, bio, is_verified) VALUES ($1, $2, $3, $4, $5)`
 	_, err := s.db.Exec(query, farmerInfo.FarmerID, farmerInfo.Rating, farmerInfo.Experience, farmerInfo.Bio, farmerInfo.IsVerified)
 
@@ -18,7 +29,7 @@ func (s *Store) CreateFarmerInfo(farmerInfo *models.FarmerInfo) error {
 	return nil
 }
 
-func (s *Store) UpdateFarmerInfo(farmerInfo *models.FarmerInfo) error {
+func (s *FarmerInfoStore) UpdateFarmerInfo(farmerInfo *models.FarmerInfo) error {
 	query := `UPDATE farmer_info SET rating = $1, experience = $2, bio = $3, is_verified = $4 WHERE farmer_id = $5`
 	_, err := s.db.Exec(query, farmerInfo.Rating, farmerInfo.Experience, farmerInfo.Bio, farmerInfo.IsVerified, farmerInfo.FarmerID)
 
@@ -31,7 +42,7 @@ func (s *Store) UpdateFarmerInfo(farmerInfo *models.FarmerInfo) error {
 	return nil
 }
 
-func (s *Store) GetFarmerInfoByFarmerId(farmerId int) (*models.FarmerInfo, error) {
+func (s *FarmerInfoStore) GetFarmerInfoByFarmerId(farmerId int) (*models.FarmerInfo, error) {
 	query := `SELECT farmer_id, rating, experience, bio, is_verified FROM farmer_info WHERE farmer_id = $1`
 	row := s.db.QueryRow(query, farmerId)
 
@@ -51,7 +62,7 @@ func (s *Store) GetFarmerInfoByFarmerId(farmerId int) (*models.FarmerInfo, error
 	return farmerInfo, nil
 }
 
-func (s *Store) DeleteFarmerInfo(farmerId int) error {
+func (s *FarmerInfoStore) DeleteFarmerInfo(farmerId int) error {
 	query := `DELETE FROM farmer_info WHERE farmer_id = $1`
 	_, err := s.db.Exec(query, farmerId)
 

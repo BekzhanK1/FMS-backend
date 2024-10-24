@@ -10,18 +10,20 @@ import (
 )
 
 type Service struct {
-	userStore types.UserStore
-	otpStore  types.OTPStore
+	userStore       types.UserStore
+	otpStore        types.OTPStore
+	farmerInfoStore types.FarmerInfoStore
 }
 
-func NewService(userStore types.UserStore, otpStore types.OTPStore) *Service {
+func NewService(userStore types.UserStore, otpStore types.OTPStore, farmerInfoStore types.FarmerInfoStore) *Service {
 	return &Service{
-		userStore: userStore,
-		otpStore:  otpStore,
+		userStore:       userStore,
+		otpStore:        otpStore,
+		farmerInfoStore: farmerInfoStore,
 	}
 }
 
-func (s *Service) CreateUser(email, username, phone, passwordHash string, isActive bool, role models.Role, profilePicture string) (string, error) {
+func (h *Service) CreateUser(email, username, first_name, last_name, phone, passwordHash string, isActive bool, role models.Role, profilePicture string) (string, error) {
 	if role == models.Admin {
 		return "", fmt.Errorf("cannot create admin user")
 	}
@@ -29,6 +31,8 @@ func (s *Service) CreateUser(email, username, phone, passwordHash string, isActi
 	userObject := &models.User{
 		Email:          email,
 		Username:       username,
+		FirstName:      first_name,
+		LastName:       last_name,
 		Phone:          phone,
 		PasswordHash:   passwordHash,
 		IsActive:       false,
@@ -38,12 +42,26 @@ func (s *Service) CreateUser(email, username, phone, passwordHash string, isActi
 		UpdatedAt:      time.Now(),
 	}
 
-	user, err := s.userStore.CreateUser(userObject)
+	user, err := h.userStore.CreateUser(userObject)
 	if err != nil {
 		return "", err
 	}
 
-	OtpCode, encryptedEmail, err := s.otpStore.CreateOTP(user)
+	if user.Role == models.Farmer {
+		farmerInfo := &models.FarmerInfo{
+			FarmerID:   user.ID,
+			Rating:     0.0,
+			Experience: 0,
+			Bio:        "",
+			IsVerified: false,
+		}
+		err = h.farmerInfoStore.CreateFarmerInfo(farmerInfo)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	OtpCode, encryptedEmail, err := h.otpStore.CreateOTP(user)
 	if err != nil {
 		return "", err
 	}

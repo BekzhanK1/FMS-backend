@@ -11,8 +11,8 @@ import (
 	db "user-service/internal/database"
 	"user-service/internal/models"
 	store "user-service/internal/repository"
-	userService "user-service/internal/service/user"
 	authService "user-service/internal/service/auth"
+	userService "user-service/internal/service/user"
 	httpHandler "user-service/internal/transport/http"
 )
 
@@ -28,10 +28,11 @@ func Run() {
 	userStore := store.NewUserStore(db)
 	tokenStore := store.NewTokenStore(db)
 	otpStore := store.NewOTPStore(db)
+	farmerInfoStore := store.NewFarmerInfoStore(db)
 
 	createAdminUserIfNotExists(userStore)
 
-	userService := userService.NewService(userStore, otpStore)
+	userService := userService.NewService(userStore, otpStore, farmerInfoStore)
 	authService := authService.NewService(tokenStore)
 	userHandler := httpHandler.NewHanlder(*userService, *authService)
 
