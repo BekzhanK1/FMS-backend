@@ -6,7 +6,17 @@ import (
 	"user-service/internal/models"
 )
 
-func (s *Store) GetTokenByUserId(userId int) (*models.Token, error) {
+type TokenStore struct {
+	db *sql.DB
+}
+
+func NewTokenStore(db *sql.DB) *TokenStore {
+	return &TokenStore{
+		db: db,
+	}
+}
+
+func (s *TokenStore) GetTokenByUserId(userId int) (*models.Token, error) {
 	query := `SELECT * FROM tokens WHERE userId = $1`
 
 	row := s.db.QueryRow(query, userId)
@@ -30,7 +40,7 @@ func (s *Store) GetTokenByUserId(userId int) (*models.Token, error) {
 	return token, nil
 }
 
-func (s *Store) CreateToken(token *models.Token) error {
+func (s *TokenStore) CreateToken(token *models.Token) error {
 	query := `
 	INSERT INTO tokens (userId, token, expiration, updated_at)
 	VALUES ($1, $2, $3, $4)
@@ -44,7 +54,7 @@ func (s *Store) CreateToken(token *models.Token) error {
 	return nil
 }
 
-func (s *Store) UpdateTokenByUserId(userId int, token *models.Token) error {
+func (s *TokenStore) UpdateTokenByUserId(userId int, token *models.Token) error {
 	query := `
 	UPDATE tokens
 		SET token = $1, expiration = $2, updated_at = $3

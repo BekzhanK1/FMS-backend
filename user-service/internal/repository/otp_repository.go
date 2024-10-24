@@ -7,7 +7,17 @@ import (
 	"user-service/internal/utils"
 )
 
-func (s *Store) CreateOTP(user *models.User) (string, string, error) {
+type OTPStore struct {
+	db *sql.DB
+}
+
+func NewOTPStore(db *sql.DB) *OTPStore {
+	return &OTPStore{
+		db: db,
+	}
+}
+
+func (s *OTPStore) CreateOTP(user *models.User) (string, string, error) {
 	encryptedEmail, err := utils.Encrypt(user.Email)
 	if err != nil {
 		return "", "", fmt.Errorf("could not encrypt email: %w", err)
@@ -30,7 +40,7 @@ func (s *Store) CreateOTP(user *models.User) (string, string, error) {
 	return otp.OTP_Code, encryptedEmail, nil
 }
 
-func (s *Store) DeleteOTP(userId int) error {
+func (s *OTPStore) DeleteOTP(userId int) error {
 	query := `
 	DELETE FROM otp
 	WHERE user_id = $1
@@ -44,7 +54,7 @@ func (s *Store) DeleteOTP(userId int) error {
 	return nil
 }
 
-func (s *Store) GetOTPByUserId(userId int) (*models.OTP, error) {
+func (s *OTPStore) GetOTPByUserId(userId int) (*models.OTP, error) {
 	query := `
 	SELECT user_id, otp_code, expires_at
 	FROM otp
@@ -70,7 +80,7 @@ func (s *Store) GetOTPByUserId(userId int) (*models.OTP, error) {
 }
 
 
-func (s *Store) RegenerateOTP(user_id int, otp_code string) error {
+func (s *OTPStore) RegenerateOTP(user_id int, otp_code string) error {
 	query := `
 	UPDATE otp
 	SET otp_code = $2, expires_at = CURRENT_TIMESTAMP + INTERVAL '10 minutes'

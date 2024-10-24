@@ -10,16 +10,16 @@ import (
 )
 
 type Service struct {
-	store types.UserStore
+	store      types.UserStore
 	tokenStore types.TokenStore
-	otpStore types.OTPStore
+	otpStore   types.OTPStore
 }
 
-func NewService(store types.UserStore, tokenStore types.TokenStore, otpStore types.OTPStore ) *Service {
+func NewService(store types.UserStore, tokenStore types.TokenStore, otpStore types.OTPStore) *Service {
 	return &Service{
 		store:      store,
 		tokenStore: tokenStore,
-		otpStore: otpStore,
+		otpStore:   otpStore,
 	}
 }
 
@@ -90,7 +90,6 @@ func (h *Service) DeleteUser(id int) error {
 	return nil
 }
 
-
 func (h *Service) GetUserByEmail(email string) (*models.User, error) {
 	user, err := h.store.GetUserByEmail(email)
 	if err != nil {
@@ -100,6 +99,7 @@ func (h *Service) GetUserByEmail(email string) (*models.User, error) {
 }
 
 
+
 func (h *Service) ActivateUser(encryptedEmail, otpCode string) error {
 	err := h.store.ActivateUser(encryptedEmail, otpCode)
 	if err != nil {
@@ -107,5 +107,3 @@ func (h *Service) ActivateUser(encryptedEmail, otpCode string) error {
 	}
 	return nil
 }
-
-

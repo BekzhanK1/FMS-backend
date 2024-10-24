@@ -7,17 +7,17 @@ import (
 	"user-service/internal/utils"
 )
 
-type Store struct {
+type UserStore struct {
 	db *sql.DB
 }
 
-func NewStore(db *sql.DB) *Store {
-	return &Store{
+func NewUserStore(db *sql.DB) *UserStore {
+	return &UserStore{
 		db,
 	}
 }
 
-func (s *Store) CreateUser(user *models.User) (*models.User, error) {
+func (s *UserStore) CreateUser(user *models.User) (*models.User, error) {
 	hashedPassword, err := utils.HashPassword(user.PasswordHash)
 	if err != nil {
 		return &models.User{}, fmt.Errorf("could not hash password: %w", err)
@@ -49,12 +49,11 @@ func (s *Store) CreateUser(user *models.User) (*models.User, error) {
 	return user, nil
 }
 
-
-func (s *Store) GetUserById(id int) (*models.User, error) {
+func (s *UserStore) GetUserById(id int) (*models.User, error) {
 	query := `SELECT id, email, username, phone_number, is_active, role, profile_picture_url, created_at, updated_at FROM users WHERE id = $1`
 
 	row := s.db.QueryRow(query, id)
-	
+
 	user := &models.User{}
 	err := row.Scan(
 		&user.ID,
@@ -78,7 +77,7 @@ func (s *Store) GetUserById(id int) (*models.User, error) {
 	return user, nil
 }
 
-func (s *Store) UpdateUser(userId int, user *models.User) error {
+func (s *UserStore) UpdateUser(userId int, user *models.User) error {
 	query := `
 		UPDATE users
 		SET email = $1, username = $2, phone = $3, password_hash = $4, is_active = $5, role = $6, profile_picture = $7, updated_at = $8
@@ -103,7 +102,7 @@ func (s *Store) UpdateUser(userId int, user *models.User) error {
 	return nil
 }
 
-func (s *Store) DeleteUser(id int) error {
+func (s *UserStore) DeleteUser(id int) error {
 	query := `DELETE FROM users WHERE id = $1`
 
 	_, err := s.db.Exec(query, id)
@@ -114,17 +113,16 @@ func (s *Store) DeleteUser(id int) error {
 	return nil
 }
 
-func (s *Store) GetUserByEmail(email string) (*models.User, error) {
+func (s *UserStore) GetUserByEmail(email string) (*models.User, error) {
 	query := `SELECT id, email, username, password_hash, phone_number, is_active, role, profile_picture_url, created_at, updated_at FROM users WHERE email = $1`
 
 	row := s.db.QueryRow(query, email)
-	
+
 	user := &models.User{}
 	err := row.Scan(
 		&user.ID,
 		&user.Email,
 		&user.Username,
-		&user.PasswordHash,
 		&user.Phone,
 		&user.IsActive,
 		&user.Role,
@@ -143,7 +141,8 @@ func (s *Store) GetUserByEmail(email string) (*models.User, error) {
 	return user, nil
 }
 
-func (s *Store) ActivateUser(encryptedEmail string, otpCode string) error {
+// TO-DO: To write it in service level
+func (s *UserStore) ActivateUser(encryptedEmail string, otpCode string) error {
 	userEmail, err := utils.Decrypt(encryptedEmail)
 	if err != nil {
 		return fmt.Errorf("could not decrypt email: %w", err)
@@ -192,4 +191,3 @@ func (s *Store) ActivateUser(encryptedEmail string, otpCode string) error {
 	return nil
 
 }
-

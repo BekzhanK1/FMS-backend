@@ -10,7 +10,7 @@ import (
 	"user-service/internal/config"
 	db "user-service/internal/database"
 	"user-service/internal/models"
-	userStore "user-service/internal/repository"
+	store "user-service/internal/repository"
 	"user-service/internal/service"
 	"user-service/internal/transport/handler"
 )
@@ -24,10 +24,13 @@ func Run() {
 
 	r := mux.NewRouter()
 
-	userStore := userStore.NewStore(db)
+	userStore := store.NewUserStore(db)
+	tokenStore := store.NewTokenStore(db)
+	otpStore := store.NewOTPStore(db)
+
 	createAdminUserIfNotExists(userStore)
 
-	userService := service.NewService(userStore, userStore, userStore)
+	userService := service.NewService(userStore, tokenStore, otpStore)
 	userHandler := handler.NewHanlder(*userService)
 
 	userRouter := r.PathPrefix("/users").Subrouter()
@@ -40,7 +43,8 @@ func Run() {
 	}
 }
 
-func createAdminUserIfNotExists(userStore *userStore.Store) {
+// TO-DO: Remove it from app file and put somewhere else
+func createAdminUserIfNotExists(userStore *store.UserStore) {
 	existingUser, err := userStore.GetUserByEmail(config.AdminConfig.Email)
 	if err != nil {
 		log.Fatalf("could not get user by email: %s", err)
@@ -63,7 +67,7 @@ func createAdminUserIfNotExists(userStore *userStore.Store) {
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	}
-	
+
 	_, err = userStore.CreateUser(adminUser)
 	if err != nil {
 		log.Fatalf("could not create admin user: %s", err)
