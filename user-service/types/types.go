@@ -57,6 +57,11 @@ type UpdateTokenPayload struct {
 	UpdatedAt  time.Time
 }
 
+type Tokens struct {
+	AccessToken  string
+	RefreshToken string
+}
+
 type LoginPayload struct {
 	Email    string `json:"email" validate:"required"`
 	Password string `json:"password" validate:"required"`

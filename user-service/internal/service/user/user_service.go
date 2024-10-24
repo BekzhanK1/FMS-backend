@@ -1,4 +1,4 @@
-package service
+package user
 
 import (
 	"fmt"
@@ -10,15 +10,13 @@ import (
 )
 
 type Service struct {
-	store      types.UserStore
-	tokenStore types.TokenStore
+	userStore  types.UserStore
 	otpStore   types.OTPStore
 }
 
-func NewService(store types.UserStore, tokenStore types.TokenStore, otpStore types.OTPStore) *Service {
+func NewService(userStore types.UserStore, otpStore types.OTPStore) *Service {
 	return &Service{
-		store:      store,
-		tokenStore: tokenStore,
+		userStore:  userStore,
 		otpStore:   otpStore,
 	}
 }
@@ -40,7 +38,7 @@ func (h *Service) CreateUser(email, username, phone, passwordHash string, isActi
 		UpdatedAt:      time.Now(),
 	}
 
-	user, err := h.store.CreateUser(userObject)
+	user, err := h.userStore.CreateUser(userObject)
 	if err != nil {
 		return "", err
 	}
@@ -55,7 +53,7 @@ func (h *Service) CreateUser(email, username, phone, passwordHash string, isActi
 }
 
 func (h *Service) GetUserById(id int) (*models.User, error) {
-	user, err := h.store.GetUserById(id)
+	user, err := h.userStore.GetUserById(id)
 	if err != nil {
 		log.Fatalf("could not get user with id %d", id)
 		return nil, err
@@ -73,7 +71,7 @@ func (h *Service) UpdateUser(id int, username, phone, profilePicture string, isA
 		UpdatedAt:      time.Now(),
 	}
 
-	if err := h.store.UpdateUser(id, user); err != nil {
+	if err := h.userStore.UpdateUser(id, user); err != nil {
 		log.Fatalf("could not update user with id %d", id)
 		return err
 	}
@@ -82,7 +80,7 @@ func (h *Service) UpdateUser(id int, username, phone, profilePicture string, isA
 }
 
 func (h *Service) DeleteUser(id int) error {
-	if err := h.store.DeleteUser(id); err != nil {
+	if err := h.userStore.DeleteUser(id); err != nil {
 		log.Fatalf("could not delete user with id %d", id)
 		return err
 	}
@@ -91,17 +89,15 @@ func (h *Service) DeleteUser(id int) error {
 }
 
 func (h *Service) GetUserByEmail(email string) (*models.User, error) {
-	user, err := h.store.GetUserByEmail(email)
+	user, err := h.userStore.GetUserByEmail(email)
 	if err != nil {
 		return nil, fmt.Errorf("user not found")
 	}
 	return user, nil
 }
 
-
-
 func (h *Service) ActivateUser(encryptedEmail, otpCode string) error {
-	err := h.store.ActivateUser(encryptedEmail, otpCode)
+	err := h.userStore.ActivateUser(encryptedEmail, otpCode)
 	if err != nil {
 		return err
 	}

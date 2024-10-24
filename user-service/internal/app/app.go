@@ -11,8 +11,9 @@ import (
 	db "user-service/internal/database"
 	"user-service/internal/models"
 	store "user-service/internal/repository"
-	"user-service/internal/service"
-	"user-service/internal/transport/handler"
+	userService "user-service/internal/service/user"
+	authService "user-service/internal/service/auth"
+	httpHandler "user-service/internal/transport/http"
 )
 
 func Run() {
@@ -30,8 +31,9 @@ func Run() {
 
 	createAdminUserIfNotExists(userStore)
 
-	userService := service.NewService(userStore, tokenStore, otpStore)
-	userHandler := handler.NewHanlder(*userService)
+	userService := userService.NewService(userStore, otpStore)
+	authService := authService.NewService(tokenStore)
+	userHandler := httpHandler.NewHanlder(*userService, *authService)
 
 	userRouter := r.PathPrefix("/users").Subrouter()
 	userHandler.RegisterRoutes(userRouter)

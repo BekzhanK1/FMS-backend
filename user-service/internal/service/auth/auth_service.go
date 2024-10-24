@@ -1,4 +1,4 @@
-package service
+package auth
 
 import (
 	"context"
@@ -7,20 +7,26 @@ import (
 	"time"
 	"user-service/internal/config"
 	"user-service/internal/models"
+	"user-service/types"
 
 	"github.com/golang-jwt/jwt/v5"
 )
-
-type Tokens struct {
-	AccessToken  string
-	RefreshToken string
-}
 
 type contextKey string
 
 const UserKey contextKey = "userID"
 
-func CreateJWT(userID int) (Tokens, error) {
+type Service struct {
+	tokenStore types.TokenStore
+}
+
+func NewService(tokenStore types.TokenStore) *Service {
+	return &Service{
+		tokenStore,
+	}
+}
+
+func CreateJWT(userID int) (types.Tokens, error) {
 	secret := []byte(config.Envs.JWTSecret)
 	accessTokenExp := config.Envs.JwtExpAccessToken
 	access_token_expiration := time.Second * time.Duration(accessTokenExp)
@@ -40,17 +46,18 @@ func CreateJWT(userID int) (Tokens, error) {
 
 	accessTokenString, err := accessToken.SignedString(secret)
 	if err != nil {
-		return Tokens{}, err
+		return types.Tokens{}, err
 	}
 
 	refreshTokenString, err := refreshToken.SignedString(secret)
 	if err != nil {
-		return Tokens{}, err
+		return types.Tokens{}, err
 	}
 
-	
-	
-	return Tokens{accessTokenString, refreshTokenString}, nil
+	return types.Tokens{
+		AccessToken:  accessTokenString,
+		RefreshToken: refreshTokenString,
+	}, nil
 }
 
 func GetUserIDFromContext(ctx context.Context) int {
@@ -63,11 +70,11 @@ func GetUserIDFromContext(ctx context.Context) int {
 }
 
 func (s *Service) GetTokenByUserId(userId int) (*models.Token, error) {
-    token, err := s.tokenStore.GetTokenByUserId(userId)
-    if err != nil {
-        return nil, fmt.Errorf("could not retrieve token: %w", err)
-    }
-    return token, nil
+	token, err := s.tokenStore.GetTokenByUserId(userId)
+	if err != nil {
+		return nil, fmt.Errorf("could not retrieve token: %w", err)
+	}
+	return token, nil
 }
 
 func (s *Service) CreateToken(token *models.Token) error {
