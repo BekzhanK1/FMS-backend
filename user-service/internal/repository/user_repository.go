@@ -129,6 +129,7 @@ func (s *UserStore) GetUserByEmail(email string) (*models.User, error) {
 		&user.ID,
 		&user.Email,
 		&user.Username,
+		&user.PasswordHash,
 		&user.Phone,
 		&user.IsActive,
 		&user.Role,
