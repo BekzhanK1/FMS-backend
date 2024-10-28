@@ -3,17 +3,15 @@ package app
 import (
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gorilla/mux"
 
-	"user-service/internal/config"
 	db "user-service/internal/database"
-	"user-service/internal/models"
 	store "user-service/internal/repository"
 	authService "user-service/internal/service/auth"
 	userService "user-service/internal/service/user"
 	httpHandler "user-service/internal/transport/http"
+	adminutils "user-service/internal/utils/adminutils"
 )
 
 func Run() {
@@ -30,7 +28,7 @@ func Run() {
 	otpStore := store.NewOTPStore(db)
 	farmerInfoStore := store.NewFarmerInfoStore(db)
 
-	createAdminUserIfNotExists(userStore)
+	adminutils.CreateAdminUserIfNotExists(userStore)
 
 	userService := userService.NewService(userStore, otpStore, farmerInfoStore)
 	authService := authService.NewService(tokenStore)
@@ -46,35 +44,4 @@ func Run() {
 	}
 }
 
-// TO-DO: Remove it from app file and put somewhere else
-func createAdminUserIfNotExists(userStore *store.UserStore) {
-	existingUser, err := userStore.GetUserByEmail(config.AdminConfig.Email)
-	if err != nil {
-		log.Fatalf("could not get user by email: %s", err)
-	}
 
-	if existingUser != nil {
-		log.Println("admin user already exists")
-		log.Printf("Admin email: %s", existingUser.Email)
-		return
-	}
-
-	adminUser := &models.User{
-		Email:          config.AdminConfig.Email,
-		Username:       config.AdminConfig.Username,
-		Phone:          config.AdminConfig.Phone,
-		PasswordHash:   config.AdminConfig.Password,
-		IsActive:       true,
-		Role:           models.Admin,
-		ProfilePicture: "",
-		CreatedAt:      time.Now(),
-		UpdatedAt:      time.Now(),
-	}
-
-	_, err = userStore.CreateUser(adminUser)
-	if err != nil {
-		log.Fatalf("could not create admin user: %s", err)
-	}
-	log.Println("admin user created")
-
-}
