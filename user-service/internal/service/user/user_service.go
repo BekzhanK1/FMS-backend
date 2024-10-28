@@ -73,6 +73,7 @@ func (h *Service) CreateUser(email, username, first_name, last_name, phone, pass
 func (s *Service) GetUserById(id int) (*models.User, error) {
 	user, err := s.userStore.GetUserById(id)
 	if err != nil {
+		log.Fatalf("error: %s", err)
 		log.Fatalf("could not get user with id %d", id)
 		return nil, err
 	}
@@ -149,9 +150,8 @@ func (s *Service) ActivateUser(encryptedEmail string, otpCode string) error {
 		return fmt.Errorf("invalid OTP code")
 	}
 
-	err = s.userStore.UpdateUser(user.ID, &models.User{
-		IsActive: true,
-	})
+	user.IsActive = true
+	err = s.userStore.UpdateUser(user.ID, user)
 	if err != nil {
 		return err
 	}

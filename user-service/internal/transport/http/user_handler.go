@@ -13,13 +13,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (h *Handler) HelloWorld(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write([]byte("Hello, World!"))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
 
 func (h *Handler) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	var payload types.CreateUserPayload
@@ -27,6 +20,7 @@ func (h *Handler) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
+	fmt.Printf("Payload: %v\n", payload)
 
 	if err := utils.Validate.Struct(payload); err != nil {
 		errors := err.(validator.ValidationErrors)
@@ -136,6 +130,7 @@ func (h *Handler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	userID, err := getUserIDFromContext(r)
+	fmt.Printf("User ID: %v\n", userID)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return

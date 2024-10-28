@@ -52,7 +52,7 @@ func (s *UserStore) CreateUser(user *models.User) (*models.User, error) {
 }
 
 func (s *UserStore) GetUserById(id int) (*models.User, error) {
-	query := `SELECT id, email, username, phone_number, is_active, role, profile_picture_url, created_at, updated_at FROM users WHERE id = $1`
+	query := `SELECT id, email, username, first_name, last_name, phone_number, is_active, role, profile_picture_url, created_at, updated_at FROM users WHERE id = $1`
 
 	row := s.db.QueryRow(query, id)
 
@@ -84,7 +84,7 @@ func (s *UserStore) GetUserById(id int) (*models.User, error) {
 func (s *UserStore) UpdateUser(userId int, user *models.User) error {
 	query := `
 		UPDATE users
-		SET email = $1, username = $2, first_name = $3, last_name = $4, phone = $5, password_hash = $6, is_active = $7, role = $8, profile_picture = $9, updated_at = $10
+		SET email = $1, username = $2, first_name = $3, last_name = $4, phone_number = $5, password_hash = $6, is_active = $7, role = $8, profile_picture_url = $9, updated_at = $10
 		WHERE id = $11
 	`
 	_, err := s.db.Exec(query,
@@ -120,7 +120,7 @@ func (s *UserStore) DeleteUser(id int) error {
 }
 
 func (s *UserStore) GetUserByEmail(email string) (*models.User, error) {
-	query := `SELECT id, email, username, password_hash, phone_number, is_active, role, profile_picture_url, created_at, updated_at FROM users WHERE email = $1`
+	query := `SELECT id, email, username, first_name, last_name, password_hash, phone_number, is_active, role, profile_picture_url, created_at, updated_at FROM users WHERE email = $1`
 
 	row := s.db.QueryRow(query, email)
 
@@ -129,6 +129,8 @@ func (s *UserStore) GetUserByEmail(email string) (*models.User, error) {
 		&user.ID,
 		&user.Email,
 		&user.Username,
+		&user.FirstName,
+		&user.LastName,
 		&user.PasswordHash,
 		&user.Phone,
 		&user.IsActive,
