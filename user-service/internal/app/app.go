@@ -8,6 +8,7 @@ import (
 
 	db "user-service/internal/database"
 	store "user-service/internal/repository"
+	applService "user-service/internal/service/application"
 	authService "user-service/internal/service/auth"
 	farmService "user-service/internal/service/farms"
 	userService "user-service/internal/service/user"
@@ -37,7 +38,8 @@ func Run() {
 	userService := userService.NewService(userStore, otpStore, farmerInfoStore, buyerInfoStore)
 	authService := authService.NewService(tokenStore)
 	farmService := farmService.NewService(farmStore, userStore, applicationStore)
-	userHandler := httpHandler.NewHanlder(*userService, *authService, *farmService)
+	applService := applService.NewService(farmStore, userStore, applicationStore)
+	userHandler := httpHandler.NewHanlder(*userService, *authService, *farmService, *applService)
 
 	userRouter := r.PathPrefix("/users").Subrouter()
 	userHandler.RegisterRoutes(userRouter)

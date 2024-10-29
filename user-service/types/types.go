@@ -52,6 +52,7 @@ type FarmStore interface {
 type ApplicationStore interface {
 	CreateApplication(application *models.Application) error
 	ListApplications() ([]*models.Application, error)
+	ListApplicationsWithDetails() ([]*ApplicationResponse, error)
 	UpdateApplication(id int, status string, rejectionReason *string) error
 	GetApplicationByID(id int) (*models.Application, error)
 	GetApplicationByFarmID(farmID int) (*models.Application, error)
@@ -111,5 +112,48 @@ type CreateFarmPayload struct {
 	CropTypes  		string `json:"crop_types"`
 	// FarmerDocument  *multipart.FileHeader `json:"farmer_document" validate:"required"`
 	// FarmDocument    *multipart.FileHeader `json:"farm_documment" validate:"required"`
+}
+
+
+
+
+
+// RESPONSE STRUCTS
+
+type ApplicationResponse struct {
+    ID              int                `json:"id"`
+    Status          models.ApplicationStatus  `json:"status"`
+    RejectionReason string             `json:"rejection_reason"`
+    CreatedAt       time.Time          `json:"created_at"`
+    Farmer          FarmerResponse     `json:"farmer"`
+    Farm            FarmDetails        `json:"farm"`
+}
+
+type FarmerResponse struct {
+    ID             int     `json:"id"`
+    FirstName      string  `json:"first_name"`
+    LastName       string  `json:"last_name"`
+    Username       string  `json:"username"`
+    Email          string  `json:"email"`
+    Phone          string  `json:"phone_number"`
+    ProfilePicture string  `json:"profile_picture_url"`
+    Role           models.Role    `json:"role"`
+    FarmerInfo     *FarmerInfoResponse `json:"farmer_info,omitempty"`
+}
+
+type FarmerInfoResponse struct {
+    Rating     float32 `json:"rating"`
+    Experience int     `json:"experience"`
+    Bio        string  `json:"bio"`
+}
+
+type FarmDetails struct {
+    ID        int    `json:"id"`
+    Name      string `json:"name"`
+    Address   string `json:"address"`
+    GeoLoc    string `json:"geo_loc"`
+    Size      string `json:"size"`
+    CropTypes string `json:"crop_types"`
+    IsVerified bool  `json:"is_verified"`
 }
 

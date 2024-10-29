@@ -1,9 +1,11 @@
 package farms
 
 import (
+	"context"
 	"fmt"
 	"time"
 	"user-service/internal/models"
+	"user-service/internal/service/auth"
 	"user-service/types"
 )
 
@@ -21,7 +23,11 @@ func NewService(farmStore types.FarmStore, userStore types.UserStore, applicatio
 	}
 }
 
-func (s *FarmService) CreateFarm(farmerID int, name, address, geoLoc, size, cropTypes string, isVerified bool) error {
+func (s *FarmService) CreateFarm(ctx context.Context, name, address, geoLoc, size, cropTypes string, isVerified bool) error {
+	farmerID, err := auth.GetUserIDFromContext(ctx)
+	if err != nil {
+		return fmt.Errorf("error retrieving user ID from context: %w", err)
+	}
 	user, err := s.userStore.GetUserById(farmerID)
 	if err != nil {
 		return fmt.Errorf("error retrieving user with ID %d: %w", farmerID, err)

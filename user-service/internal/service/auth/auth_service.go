@@ -6,15 +6,12 @@ import (
 	"strconv"
 	"time"
 	"user-service/internal/config"
+	"user-service/internal/middleware"
 	"user-service/internal/models"
 	"user-service/types"
 
 	"github.com/golang-jwt/jwt/v5"
 )
-
-type contextKey string
-
-const UserKey contextKey = "userID"
 
 type Service struct {
 	tokenStore types.TokenStore
@@ -60,13 +57,17 @@ func CreateJWT(userID int) (types.Tokens, error) {
 	}, nil
 }
 
-func GetUserIDFromContext(ctx context.Context) int {
-	userID, ok := ctx.Value(UserKey).(int)
+func GetUserIDFromContext(ctx context.Context) (int, error) {
+	userIdstr, ok := ctx.Value(middleware.UserKey).(string)
 	if !ok {
-		return -1
+		return 0, fmt.Errorf("unable to get user ID from context")
+	}
+	userId, err := strconv.Atoi(userIdstr)
+	if err != nil {
+		return 0, err
 	}
 
-	return userID
+	return userId, nil
 }
 
 func (s *Service) GetTokenByUserId(userId int) (*models.Token, error) {

@@ -18,6 +18,6 @@ CREATE TABLE IF NOT EXISTS applications (
     farmer_id INT NOT NULL REFERENCES users(id) ON DELETE SET NULL,
     farm_id INT NOT NULL REFERENCES farms(id) ON DELETE SET NULL,
     status VARCHAR(20) NOT NULL CHECK (status IN ('pending', 'approved', 'rejected', 'under_review')),
-    rejection_reason TEXT,
+    rejection_reason TEXT DEFAULT '',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
