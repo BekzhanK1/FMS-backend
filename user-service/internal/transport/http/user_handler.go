@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"user-service/internal/middleware"
+	"user-service/internal/service/auth"
 	"user-service/internal/utils"
 	"user-service/types"
 
@@ -128,7 +128,7 @@ func (h *Handler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 
 
 func (h *Handler) ProfileHandler(w http.ResponseWriter, r *http.Request) {
-	userID, err := getUserIDFromContext(r)
+	userID, err := auth.GetUserIDFromContext(r.Context())
 	fmt.Printf("User ID: %v\n", userID)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
@@ -145,18 +145,5 @@ func (h *Handler) ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
-}
-
-
-func getUserIDFromContext(r *http.Request) (int, error) {
-	userIdstr, ok := r.Context().Value(middleware.UserKey).(string)
-	if !ok {
-		return 0, fmt.Errorf("unable to get user ID from context")
-	}
-	userId, err := strconv.Atoi(userIdstr)
-	if err != nil {
-		return 0, err
-	}
-	return userId, nil	
 }
 
