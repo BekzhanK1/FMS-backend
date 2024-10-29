@@ -10,12 +10,14 @@ import (
 type FarmService struct {
 	farmStore types.FarmStore
 	userStore types.UserStore
+	applicationStore types.ApplicationStore
 }
 
-func NewService(farmStore types.FarmStore, userStore types.UserStore) *FarmService {
+func NewService(farmStore types.FarmStore, userStore types.UserStore, applicationStore types.ApplicationStore) *FarmService {
 	return &FarmService{
 		farmStore,
 		userStore,
+		applicationStore,
 	}
 }
 
@@ -46,9 +48,19 @@ func (s *FarmService) CreateFarm(farmerID int, name, address, geoLoc, size, crop
 		FarmerID:   farmerID,
 	}
 
-	err = s.farmStore.CreateFarm(farm)
+	farm, err = s.farmStore.CreateFarm(farm)
 	if err != nil {
 		return fmt.Errorf("could not create farm: %w", err)
+	}
+
+	application := &models.Application{
+		FarmerID: user.ID,
+		FarmID: farm.ID,
+	}
+
+	err = s.applicationStore.CreateApplication(application)
+	if err != nil {
+		return fmt.Errorf("could not create application: %w", err)
 	}
 
 	return nil

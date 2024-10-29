@@ -40,14 +40,22 @@ type BuyerInfoStore interface {
 	DeleteBuyerInfo(int) error
 }
 
-
 type FarmStore interface {
-	CreateFarm(farm *models.Farm) error
+	CreateFarm(farm *models.Farm) (*models.Farm, error)
 	GetFarmByID(id int) (*models.Farm, error)
 	UpdateFarm(farmerID int, farm *models.Farm) error
 	DeleteFarm(farmerID, id int) error
 	ListFarms() ([]*models.Farm, error)
 	ListFarmsByFarmerID(farmerID int) ([]*models.Farm, error)
+}
+
+type ApplicationStore interface {
+	CreateApplication(application *models.Application) error
+	ListApplications() ([]*models.Application, error)
+	UpdateApplication(id int, status string, rejectionReason *string) error
+	GetApplicationByID(id int) (*models.Application, error)
+	GetApplicationByFarmID(farmID int) (*models.Application, error)
+	GetApplicationsByFarmerID(farmerID int) ([]*models.Application, error)
 }
 
 

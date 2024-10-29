@@ -30,12 +30,13 @@ func Run() {
 	farmerInfoStore := store.NewFarmerInfoStore(db)
 	buyerInfoStore := store.NewBuyerInfoStore(db)
 	farmStore := store.NewFarmStore(db)
+	applicationStore := store.NewApplicationStore(db)
 
 	adminutils.CreateAdminUserIfNotExists(userStore)
 
 	userService := userService.NewService(userStore, otpStore, farmerInfoStore, buyerInfoStore)
 	authService := authService.NewService(tokenStore)
-	farmService := farmService.NewService(farmStore, userStore)
+	farmService := farmService.NewService(farmStore, userStore, applicationStore)
 	userHandler := httpHandler.NewHanlder(*userService, *authService, *farmService)
 
 	userRouter := r.PathPrefix("/users").Subrouter()
