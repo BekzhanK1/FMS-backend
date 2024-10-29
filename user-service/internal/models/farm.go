@@ -12,6 +12,7 @@ type Farm struct {
 	GeoLoc    string    `json:"geo_loc" db:"geo_loc"`
 	Size      string    `json:"size" db:"size"`
 	CropTypes string    `json:"crop_types" db:"crop_types"`
+	IsVerified bool     `json:"is_verified" db:"is_verified"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }

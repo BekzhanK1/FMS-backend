@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"user-service/internal/middleware"
 	authService "user-service/internal/service/auth"
+	farmService "user-service/internal/service/farms"
 	userService "user-service/internal/service/user"
 
 	"github.com/gorilla/mux"
@@ -12,12 +13,14 @@ import (
 type Handler struct {
 	userService userService.Service
 	authService authService.Service
+	farmService farmService.FarmService
 }
 
-func NewHanlder(userService userService.Service, authService authService.Service) *Handler {
+func NewHanlder(userService userService.Service, authService authService.Service, farmService farmService.FarmService) *Handler {
 	return &Handler{
 		userService,
 		authService,
+		farmService,
 	}
 }
 
@@ -31,4 +34,5 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 	protected := router.PathPrefix("/api").Subrouter()
 	protected.Use(middleware.AuthMiddleware)
 	protected.HandleFunc("/profile", h.ProfileHandler).Methods(http.MethodGet)
+	protected.HandleFunc("/farms", h.CreateFarmHandler).Methods(http.MethodPost)
 }

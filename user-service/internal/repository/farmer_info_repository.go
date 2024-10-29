@@ -17,8 +17,8 @@ func NewFarmerInfoStore(db *sql.DB) *FarmerInfoStore {
 }
 
 func (s *FarmerInfoStore) CreateFarmerInfo(farmerInfo *models.FarmerInfo) error {
-	query := `INSERT INTO farmer_info (farmer_id, rating, experience, bio, is_verified) VALUES ($1, $2, $3, $4, $5)`
-	_, err := s.db.Exec(query, farmerInfo.FarmerID, farmerInfo.Rating, farmerInfo.Experience, farmerInfo.Bio, farmerInfo.IsVerified)
+	query := `INSERT INTO farmer_info (farmer_id, rating, experience, bio) VALUES ($1, $2, $3, $4)`
+	_, err := s.db.Exec(query, farmerInfo.FarmerID, farmerInfo.Rating, farmerInfo.Experience, farmerInfo.Bio)
 
 	if err != nil {
 		return fmt.Errorf("could not create farmer info: %w", err)
@@ -30,8 +30,8 @@ func (s *FarmerInfoStore) CreateFarmerInfo(farmerInfo *models.FarmerInfo) error 
 }
 
 func (s *FarmerInfoStore) UpdateFarmerInfo(farmerInfo *models.FarmerInfo) error {
-	query := `UPDATE farmer_info SET rating = $1, experience = $2, bio = $3, is_verified = $4 WHERE farmer_id = $5`
-	_, err := s.db.Exec(query, farmerInfo.Rating, farmerInfo.Experience, farmerInfo.Bio, farmerInfo.IsVerified, farmerInfo.FarmerID)
+	query := `UPDATE farmer_info SET rating = $1, experience = $2, bio = $3 WHERE farmer_id = $5`
+	_, err := s.db.Exec(query, farmerInfo.Rating, farmerInfo.Experience, farmerInfo.Bio, farmerInfo.FarmerID)
 
 	if err != nil {
 		return fmt.Errorf("could not update farmer info: %w", err)
@@ -43,7 +43,7 @@ func (s *FarmerInfoStore) UpdateFarmerInfo(farmerInfo *models.FarmerInfo) error 
 }
 
 func (s *FarmerInfoStore) GetFarmerInfoByFarmerId(farmerId int) (*models.FarmerInfo, error) {
-	query := `SELECT farmer_id, rating, experience, bio, is_verified FROM farmer_info WHERE farmer_id = $1`
+	query := `SELECT farmer_id, rating, experience, bio FROM farmer_info WHERE farmer_id = $1`
 	row := s.db.QueryRow(query, farmerId)
 
 	farmerInfo := &models.FarmerInfo{}
@@ -52,7 +52,6 @@ func (s *FarmerInfoStore) GetFarmerInfoByFarmerId(farmerId int) (*models.FarmerI
 		&farmerInfo.Rating,
 		&farmerInfo.Experience,
 		&farmerInfo.Bio,
-		&farmerInfo.IsVerified,
 	)
 
 	if err != nil {

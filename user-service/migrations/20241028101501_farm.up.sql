@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS farms (
+    id BIGSERIAL PRIMARY KEY,
+    farmer_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    address VARCHAR(255),
+    geo_loc VARCHAR(255),
+    size VARCHAR(50),
+    crop_types VARCHAR(255),
+    is_verified BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (farmer_id) REFERENCES users(id) ON DELETE CASCADE
+);

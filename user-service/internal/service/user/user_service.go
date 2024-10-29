@@ -53,7 +53,6 @@ func (h *Service) CreateUser(email, username, first_name, last_name, phone, pass
 			Rating:     0.0,
 			Experience: 0,
 			Bio:        "",
-			IsVerified: false,
 		}
 		err = h.farmerInfoStore.CreateFarmerInfo(farmerInfo)
 		if err != nil {

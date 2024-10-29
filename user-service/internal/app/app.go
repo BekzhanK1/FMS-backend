@@ -9,6 +9,7 @@ import (
 	db "user-service/internal/database"
 	store "user-service/internal/repository"
 	authService "user-service/internal/service/auth"
+	farmService "user-service/internal/service/farms"
 	userService "user-service/internal/service/user"
 	httpHandler "user-service/internal/transport/http"
 	adminutils "user-service/internal/utils/adminutils"
@@ -27,12 +28,14 @@ func Run() {
 	tokenStore := store.NewTokenStore(db)
 	otpStore := store.NewOTPStore(db)
 	farmerInfoStore := store.NewFarmerInfoStore(db)
+	farmStore := store.NewFarmStore(db)
 
 	adminutils.CreateAdminUserIfNotExists(userStore)
 
 	userService := userService.NewService(userStore, otpStore, farmerInfoStore)
 	authService := authService.NewService(tokenStore)
-	userHandler := httpHandler.NewHanlder(*userService, *authService)
+	farmService := farmService.NewService(farmStore, userStore)
+	userHandler := httpHandler.NewHanlder(*userService, *authService, *farmService)
 
 	userRouter := r.PathPrefix("/users").Subrouter()
 	userHandler.RegisterRoutes(userRouter)

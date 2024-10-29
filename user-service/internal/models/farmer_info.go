@@ -5,5 +5,4 @@ type FarmerInfo struct {
 	Rating     float32 `json:"rating" db:"rating"`
 	Experience int `json:"experience" db:"experience"`
 	Bio 	  string `json:"bio" db:"bio"`
-	IsVerified bool `json:"is_verified" db:"is_verified"`
 }

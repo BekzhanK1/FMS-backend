@@ -20,7 +20,6 @@ func (h *Handler) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
-	fmt.Printf("Payload: %v\n", payload)
 
 	if err := utils.Validate.Struct(payload); err != nil {
 		errors := err.(validator.ValidationErrors)

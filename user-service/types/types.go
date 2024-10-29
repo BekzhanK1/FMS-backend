@@ -32,6 +32,16 @@ type FarmerInfoStore interface {
 	GetFarmerInfoByFarmerId(int) (*models.FarmerInfo, error)
 	DeleteFarmerInfo(int) error
 }
+
+type FarmStore interface {
+	CreateFarm(farm *models.Farm) error
+	GetFarmByID(id int) (*models.Farm, error)
+	UpdateFarm(farmerID int, farm *models.Farm) error
+	DeleteFarm(farmerID, id int) error
+	ListFarms() ([]*models.Farm, error)
+	ListFarmsByFarmerID(farmerID int) ([]*models.Farm, error)
+}
+
 	
 
 type CreateUserPayload struct {
@@ -73,5 +83,15 @@ type Tokens struct {
 type LoginPayload struct {
 	Email    string `json:"email" validate:"required"`
 	Password string `json:"password" validate:"required"`
+}
+
+type CreateFarmPayload struct {
+	Name       		string `json:"name" validate:"required"`
+	Address    		string `json:"address"`
+	GeoLoc     		string `json:"geo_loc"`
+	Size       		string `json:"size"`
+	CropTypes  		string `json:"crop_types"`
+	// FarmerDocument  *multipart.FileHeader `json:"farmer_document" validate:"required"`
+	// FarmDocument    *multipart.FileHeader `json:"farm_documment" validate:"required"`
 }
 

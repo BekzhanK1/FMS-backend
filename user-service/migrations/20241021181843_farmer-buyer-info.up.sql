@@ -3,7 +3,6 @@ CREATE TABLE IF NOT EXISTS farmer_info (
     rating FLOAT DEFAULT 0,
     experience INT,
     bio TEXT,
-    is_verified BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (farmer_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
@@ -23,7 +22,7 @@ CREATE TABLE IF NOT EXISTS socials (
 );
 
 CREATE TABLE IF NOT EXISTS documents (
-    id INT,
+    id BIGSERIAL,
     user_id INT,
     document_type VARCHAR(255) NOT NULL,
     document_url VARCHAR(255) NOT NULL,
