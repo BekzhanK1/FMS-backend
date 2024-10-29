@@ -88,8 +88,7 @@ func (s *ApplicationStore) ListApplicationsWithDetails() ([]*types.ApplicationRe
         f.address AS farm_address,
         f.geo_loc AS farm_geo_loc,
         f.size AS farm_size,
-        f.crop_types AS farm_crop_types,
-        f.is_verified AS farm_is_verified
+        f.crop_types AS farm_crop_types
     FROM applications a
     JOIN users u ON a.farmer_id = u.id
     LEFT JOIN farmer_info fi ON fi.farmer_id = u.id
@@ -105,7 +104,6 @@ func (s *ApplicationStore) ListApplicationsWithDetails() ([]*types.ApplicationRe
     var applications []*types.ApplicationResponse
     for rows.Next() {
         var app types.ApplicationResponse
-        var farmerInfo types.FarmerInfoResponse
         
         // Scan into struct fields
         err = rows.Scan(
@@ -121,24 +119,18 @@ func (s *ApplicationStore) ListApplicationsWithDetails() ([]*types.ApplicationRe
             &app.Farmer.Phone,
             &app.Farmer.ProfilePicture,
             &app.Farmer.Role,
-            &farmerInfo.Rating,
-            &farmerInfo.Experience,
-            &farmerInfo.Bio,
+            &app.Farmer.Rating,
+            &app.Farmer.Experience,
+            &app.Farmer.Bio,
             &app.Farm.ID,
             &app.Farm.Name,
             &app.Farm.Address,
             &app.Farm.GeoLoc,
             &app.Farm.Size,
             &app.Farm.CropTypes,
-            &app.Farm.IsVerified,
         )
         if err != nil {
             return nil, fmt.Errorf("could not scan application details: %w", err)
-        }
-
-        // Attach FarmerInfo only if valid data was retrieved
-        if farmerInfo.Rating != 0 || farmerInfo.Experience != 0 || farmerInfo.Bio != "" {
-            app.Farmer.FarmerInfo = &farmerInfo
         }
 
         applications = append(applications, &app)

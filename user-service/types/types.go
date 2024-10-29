@@ -138,11 +138,7 @@ type FarmerResponse struct {
     Phone          string  `json:"phone_number"`
     ProfilePicture string  `json:"profile_picture_url"`
     Role           models.Role    `json:"role"`
-    FarmerInfo     *FarmerInfoResponse `json:"farmer_info,omitempty"`
-}
-
-type FarmerInfoResponse struct {
-    Rating     float32 `json:"rating"`
+	Rating     float32 `json:"rating"`
     Experience int     `json:"experience"`
     Bio        string  `json:"bio"`
 }
@@ -154,6 +150,5 @@ type FarmDetails struct {
     GeoLoc    string `json:"geo_loc"`
     Size      string `json:"size"`
     CropTypes string `json:"crop_types"`
-    IsVerified bool  `json:"is_verified"`
 }
 
