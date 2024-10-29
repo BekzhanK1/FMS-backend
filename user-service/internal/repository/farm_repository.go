@@ -17,9 +17,21 @@ func NewFarmStore(db *sql.DB) *FarmStore {
 }
 
 func (s *FarmStore) CreateFarm(farm *models.Farm) error {
+	countQuery := `SELECT COUNT(*) FROM farms WHERE farmer_id = $1`
+	var count int
+	err := s.db.QueryRow(countQuery, farm.FarmerID).Scan(&count)
+	if err != nil {
+		return fmt.Errorf("could not count farms: %w", err)
+	}
+
+	if count >= 5 {
+		return fmt.Errorf("farmer with ID %d has reached the maximum number of farms, which is 5", farm.FarmerID)
+	}
+
 	query := `INSERT INTO farms (name, address, farmer_id, geo_loc, size, crop_types, is_verified, created_at, updated_at) 
 	          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
-	_, err := s.db.Exec(query, farm.Name, farm.Address, farm.FarmerID, farm.GeoLoc, farm.Size, farm.CropTypes, farm.IsVerified, farm.CreatedAt, farm.UpdatedAt)
+			  
+	_, err = s.db.Exec(query, farm.Name, farm.Address, farm.FarmerID, farm.GeoLoc, farm.Size, farm.CropTypes, farm.IsVerified, farm.CreatedAt, farm.UpdatedAt)
 
 	if err != nil {
 		return fmt.Errorf("could not create farm: %w", err)

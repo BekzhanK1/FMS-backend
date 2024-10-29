@@ -28,11 +28,12 @@ func Run() {
 	tokenStore := store.NewTokenStore(db)
 	otpStore := store.NewOTPStore(db)
 	farmerInfoStore := store.NewFarmerInfoStore(db)
+	buyerInfoStore := store.NewBuyerInfoStore(db)
 	farmStore := store.NewFarmStore(db)
 
 	adminutils.CreateAdminUserIfNotExists(userStore)
 
-	userService := userService.NewService(userStore, otpStore, farmerInfoStore)
+	userService := userService.NewService(userStore, otpStore, farmerInfoStore, buyerInfoStore)
 	authService := authService.NewService(tokenStore)
 	farmService := farmService.NewService(farmStore, userStore)
 	userHandler := httpHandler.NewHanlder(*userService, *authService, *farmService)

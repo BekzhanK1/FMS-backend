@@ -32,7 +32,7 @@ func (h *Handler) CreateFarmHandler(w http.ResponseWriter, r *http.Request) {
 	// Call the service layer to create the farm
 	err = h.farmService.CreateFarm(userId, payload.Name, payload.Address, payload.GeoLoc, payload.Size, payload.CropTypes, false)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 

@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS farmer_info (
 CREATE TABLE IF NOT EXISTS buyer_info (
     buyer_id INT PRIMARY KEY,
     delivery_address VARCHAR(255),
-    payment_preferences VARCHAR(255),
+    payment_method VARCHAR(255),
     FOREIGN KEY (buyer_id) REFERENCES users (id) ON DELETE CASCADE
 );
 

@@ -33,6 +33,14 @@ type FarmerInfoStore interface {
 	DeleteFarmerInfo(int) error
 }
 
+type BuyerInfoStore interface {
+	CreateBuyerInfo(*models.BuyerInfo) error
+	UpdateBuyerInfo(*models.BuyerInfo) error
+	GetBuyerInfoByBuyerID(int) (*models.BuyerInfo, error)
+	DeleteBuyerInfo(int) error
+}
+
+
 type FarmStore interface {
 	CreateFarm(farm *models.Farm) error
 	GetFarmByID(id int) (*models.Farm, error)
@@ -41,6 +49,8 @@ type FarmStore interface {
 	ListFarms() ([]*models.Farm, error)
 	ListFarmsByFarmerID(farmerID int) ([]*models.Farm, error)
 }
+
+
 
 	
 
