@@ -125,8 +125,6 @@ func (h *Handler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
-
 func (h *Handler) ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	userID, err := auth.GetUserIDFromContext(r.Context())
 	fmt.Printf("User ID: %v\n", userID)
@@ -140,6 +138,7 @@ func (h *Handler) ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
+
 
 	if err = utils.WriteJSON(w, http.StatusOK, user); err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)

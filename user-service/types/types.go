@@ -74,6 +74,17 @@ type CreateUserPayload struct {
 	ProfilePicture string      `json:"profile_picture" validate:"omitempty"`
 }
 
+type UserResponse struct {
+	ID             int    `json:"id"`
+	Email          string `json:"email"`
+	Username       string `json:"username"`
+	FirstName      string `json:"first_name"`
+	LastName       string `json:"last_name"`
+	Phone          string `json:"phone_number"`
+	ProfilePicture string `json:"profile_picture_url"`
+	Role           models.Role `json:"role"`
+}
+
 type UpdateUserPayload struct {
 	Username       string `json:"username" validate:"required"`
 	Phone          string `json:"phone" validate:"required"`

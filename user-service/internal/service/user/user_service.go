@@ -83,15 +83,25 @@ func (h *Service) CreateUser(email, username, first_name, last_name, phone, pass
 	return encryptedEmail, nil
 }
 
-func (s *Service) GetUserById(id int) (*models.User, error) {
+func (s *Service) GetUserById(id int) (*types.UserResponse, error) {
 	user, err := s.userStore.GetUserById(id)
+	userResponse := types.UserResponse{
+		ID:             user.ID,
+		Email:          user.Email,
+		Username:       user.Username,
+		FirstName:      user.FirstName,
+		LastName:       user.LastName,
+		Phone:          user.Phone,
+		ProfilePicture: user.ProfilePicture,
+		Role:           user.Role,
+	}
 	if err != nil {
 		log.Fatalf("error: %s", err)
 		log.Fatalf("could not get user with id %d", id)
 		return nil, err
 	}
 
-	return user, nil
+	return &userResponse, nil
 }
 
 func (s *Service) UpdateUser(id int, username, phone, profilePicture string, isActive bool) error {
