@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"user-service/internal/models"
+	"user-service/types"
 )
 
 type FarmStore struct {
@@ -40,32 +41,197 @@ func (s *FarmStore) CreateFarm(farm *models.Farm) (*models.Farm, error) {
 	return farm, nil
 }
 
-
-func (s *FarmStore) GetFarmByID(id int) (*models.Farm, error) {
-	query := `SELECT id, farmer_id, name, address, geo_loc, size, crop_types, is_verified, created_at, updated_at FROM farms WHERE id = $1`
+func (s *FarmStore) GetFarmByID(id int) (*types.FarmResponse, error) {
+	query := `
+	SELECT  
+    f.id AS farm_id,
+    f.name AS farm_name,
+    f.address AS farm_address,
+    f.geo_loc AS farm_geo_loc,
+    f.size AS farm_size,
+    f.crop_types AS farm_crop_types,
+	
+    u.id AS farmer_id,
+    u.first_name,
+    u.last_name,
+    u.username,
+    u.email,
+    u.phone_number,
+    u.profile_picture_url,
+    u.role,
+    
+    fi.rating,
+    fi.experience,
+    fi.bio
+	FROM farms f 
+	JOIN users u ON f.farmer_id = u.id
+	LEFT JOIN farmer_info fi ON fi.farmer_id = u.id
+	WHERE f.id = $1 AND f.is_verified = true;
+	`
 	row := s.db.QueryRow(query, id)
 
-	farm := &models.Farm{}
+	farm := &types.FarmResponse{}
 	err := row.Scan(
 		&farm.ID,
-		&farm.FarmerID,
 		&farm.Name,
 		&farm.Address,
 		&farm.GeoLoc,
 		&farm.Size,
 		&farm.CropTypes,
-		&farm.IsVerified,
-		&farm.CreatedAt,
-		&farm.UpdatedAt,
+		&farm.Farmer.ID,
+		&farm.Farmer.FirstName,
+		&farm.Farmer.LastName,
+		&farm.Farmer.Username,
+		&farm.Farmer.Email,
+		&farm.Farmer.Phone,
+		&farm.Farmer.ProfilePicture,
+		&farm.Farmer.Role,
+		&farm.Farmer.Rating,
+		&farm.Farmer.Experience,
+		&farm.Farmer.Bio,
 	)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	} else if err != nil {
+		return nil, fmt.Errorf("could not get farm by ID: %w", err)
+	}
+	return farm, nil
+}
+
+func (s *FarmStore) ListFarms() ([]*types.FarmResponse, error) {
+	query := `	
+	SELECT  
+    f.id AS farm_id,
+    f.name AS farm_name,
+    f.address AS farm_address,
+    f.geo_loc AS farm_geo_loc,
+    f.size AS farm_size,
+    f.crop_types AS farm_crop_types,
+	
+    u.id AS farmer_id,
+    u.first_name,
+    u.last_name,
+    u.username,
+    u.email,
+    u.phone_number,
+    u.profile_picture_url,
+    u.role,
+    
+    fi.rating,
+    fi.experience,
+    fi.bio
+	FROM farms f 
+	JOIN users u ON f.farmer_id = u.id
+	LEFT JOIN farmer_info fi ON fi.farmer_id = u.id
+	WHERE f.is_verified = true;
+	`
+	rows, err := s.db.Query(query)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
+		return nil, fmt.Errorf("could not list farms: %w", err)
+	}
+	defer rows.Close()
+
+	farms := make([]*types.FarmResponse, 0)
+	for rows.Next() {
+		farm := &types.FarmResponse{}
+		err = rows.Scan(
+			&farm.ID,
+			&farm.Name,
+			&farm.Address,
+			&farm.GeoLoc,
+			&farm.Size,
+			&farm.CropTypes,
+			&farm.Farmer.ID,
+			&farm.Farmer.FirstName,
+			&farm.Farmer.LastName,
+			&farm.Farmer.Username,
+			&farm.Farmer.Email,
+			&farm.Farmer.Phone,
+			&farm.Farmer.ProfilePicture,
+			&farm.Farmer.Role,
+			&farm.Farmer.Rating,
+			&farm.Farmer.Experience,
+			&farm.Farmer.Bio,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("could not scan farm: %w", err)
 		}
-		return nil, fmt.Errorf("could not get farm: %w", err)
+		farms = append(farms, farm)
 	}
 
-	return farm, nil
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	return farms, nil
+}
+
+func (s *FarmStore) ListFarmsByFarmerID(farmerID int) ([]*types.FarmResponse, error) {
+	query := `
+	SELECT  
+    f.id AS farm_id,
+    f.name AS farm_name,
+    f.address AS farm_address,
+    f.geo_loc AS farm_geo_loc,
+    f.size AS farm_size,
+    f.crop_types AS farm_crop_types,
+	
+    u.id AS farmer_id,
+    u.first_name,
+    u.last_name,
+    u.username,
+    u.email,
+    u.phone_number,
+    u.profile_picture_url,
+    u.role,
+    
+    fi.rating,
+    fi.experience,
+    fi.bio
+	FROM farms f 
+	JOIN users u ON f.farmer_id = u.id
+	LEFT JOIN farmer_info fi ON fi.farmer_id = u.id
+	WHERE f.farmer_id = $1 AND f.is_verified = true
+	`
+	rows, err := s.db.Query(query, farmerID)
+	if err != nil {
+		return nil, fmt.Errorf("could not list farms: %w", err)
+	}
+	defer rows.Close()
+
+	farms := make([]*types.FarmResponse, 0)
+	for rows.Next() {
+		farm := &types.FarmResponse{}
+		err = rows.Scan(
+			&farm.ID,
+			&farm.Name,
+			&farm.Address,
+			&farm.GeoLoc,
+			&farm.Size,
+			&farm.CropTypes,
+			&farm.Farmer.ID,
+			&farm.Farmer.FirstName,
+			&farm.Farmer.LastName,
+			&farm.Farmer.Username,
+			&farm.Farmer.Email,
+			&farm.Farmer.Phone,
+			&farm.Farmer.ProfilePicture,
+			&farm.Farmer.Role,
+			&farm.Farmer.Rating,
+			&farm.Farmer.Experience,
+			&farm.Farmer.Bio,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("could not scan farm: %w", err)
+		}
+		farms = append(farms, farm)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	return farms, nil
 }
 
 func (s *FarmStore) UpdateFarm(farmerID int, farm *models.Farm) error {
@@ -90,76 +256,4 @@ func (s *FarmStore) DeleteFarm(farmerID int, id int) error {
 
 	fmt.Println("Farm deleted successfully")
 	return nil
-}
-
-func (s *FarmStore) ListFarms() ([]*models.Farm, error) {
-	query := `SELECT id, farmer_id, name, address, geo_loc, size, crop_types, is_verified, created_at, updated_at FROM farms`
-	rows, err := s.db.Query(query)
-	if err != nil {
-		return nil, fmt.Errorf("could not list farms: %w", err)
-	}
-	defer rows.Close()
-
-	var farms []*models.Farm
-	for rows.Next() {
-		farm := &models.Farm{}
-		err = rows.Scan(
-			&farm.ID,
-			&farm.FarmerID,
-			&farm.Name,
-			&farm.Address,
-			&farm.GeoLoc,
-			&farm.Size,
-			&farm.CropTypes,
-			&farm.IsVerified,
-			&farm.CreatedAt,
-			&farm.UpdatedAt,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("could not scan farm: %w", err)
-		}
-		farms = append(farms, farm)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("row iteration error: %w", err)
-	}
-
-	return farms, nil
-}
-
-func (s *FarmStore) ListFarmsByFarmerID(farmerID int) ([]*models.Farm, error) {
-	query := `SELECT id, farmer_id, name, address, geo_loc, size, crop_types, is_verified, created_at, updated_at FROM farms WHERE farmer_id = $1`
-	rows, err := s.db.Query(query, farmerID)
-	if err != nil {
-		return nil, fmt.Errorf("could not list farms by farmer ID: %w", err)
-	}
-	defer rows.Close()
-
-	var farms []*models.Farm
-	for rows.Next() {
-		farm := &models.Farm{}
-		err = rows.Scan(
-			&farm.ID,
-			&farm.FarmerID,
-			&farm.Name,
-			&farm.Address,
-			&farm.GeoLoc,
-			&farm.Size,
-			&farm.CropTypes,
-			&farm.IsVerified,
-			&farm.CreatedAt,
-			&farm.UpdatedAt,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("could not scan farm: %w", err)
-		}
-		farms = append(farms, farm)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("row iteration error: %w", err)
-	}
-
-	return farms, nil
 }

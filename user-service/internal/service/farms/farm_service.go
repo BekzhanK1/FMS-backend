@@ -10,8 +10,8 @@ import (
 )
 
 type FarmService struct {
-	farmStore types.FarmStore
-	userStore types.UserStore
+	farmStore        types.FarmStore
+	userStore        types.UserStore
 	applicationStore types.ApplicationStore
 }
 
@@ -61,7 +61,7 @@ func (s *FarmService) CreateFarm(ctx context.Context, name, address, geoLoc, siz
 
 	application := &models.Application{
 		FarmerID: user.ID,
-		FarmID: farm.ID,
+		FarmID:   farm.ID,
 	}
 
 	err = s.applicationStore.CreateApplication(application)
@@ -72,26 +72,30 @@ func (s *FarmService) CreateFarm(ctx context.Context, name, address, geoLoc, siz
 	return nil
 }
 
-
-func (s *FarmService) GetFarmByID(id int) (*models.Farm, error) {
-	farm, err := s.farmStore.GetFarmByID(id)
-	if err != nil {
-		return nil, err
-	}
-
-	return farm, nil
-}
-
-func (s *FarmService) ListFarms() ([]*models.Farm, error) {
+func (s *FarmService) ListFarms() ([]*types.FarmResponse, error) {
 	farms, err := s.farmStore.ListFarms()
 	if err != nil {
 		return nil, err
 	}
 
 	return farms, nil
+
 }
 
-func (s *FarmService) ListFarmsByFarmerID(farmerID int) ([]*models.Farm, error) {
+func (s *FarmService) GetFarmByID(id int) (*types.FarmResponse, error) {
+	farm, err := s.farmStore.GetFarmByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	if farm == nil {
+		return nil, fmt.Errorf("farm not found")
+	}
+
+	return farm, nil
+}
+
+func (s *FarmService) ListFarmsByFarmerID(farmerID int) ([]*types.FarmResponse, error) {
 	farms, err := s.farmStore.ListFarmsByFarmerID(farmerID)
 	if err != nil {
 		return nil, err
@@ -102,14 +106,14 @@ func (s *FarmService) ListFarmsByFarmerID(farmerID int) ([]*models.Farm, error) 
 
 func (s *FarmService) UpdateFarm(farmerID int, id int, name, address, geoLoc string, size string, cropTypes string, isVerified bool) error {
 	farm := &models.Farm{
-		ID:        id,
-		Name:      name,
-		Address:   address,
-		GeoLoc:    geoLoc,
-		Size:      size,
-		CropTypes: cropTypes,
+		ID:         id,
+		Name:       name,
+		Address:    address,
+		GeoLoc:     geoLoc,
+		Size:       size,
+		CropTypes:  cropTypes,
 		IsVerified: isVerified,
-		UpdatedAt: time.Now(),
+		UpdatedAt:  time.Now(),
 	}
 
 	err := s.farmStore.UpdateFarm(farmerID, farm)

@@ -42,11 +42,11 @@ type BuyerInfoStore interface {
 
 type FarmStore interface {
 	CreateFarm(farm *models.Farm) (*models.Farm, error)
-	GetFarmByID(id int) (*models.Farm, error)
+	GetFarmByID(id int) (*FarmResponse, error)
 	UpdateFarm(farmerID int, farm *models.Farm) error
 	DeleteFarm(farmerID, id int) error
-	ListFarms() ([]*models.Farm, error)
-	ListFarmsByFarmerID(farmerID int) ([]*models.Farm, error)
+	ListFarms() ([]*FarmResponse, error)
+	ListFarmsByFarmerID(farmerID int) ([]*FarmResponse, error)
 }
 
 type ApplicationStore interface {
@@ -135,6 +135,10 @@ type ApplicationResponse struct {
 	Farm            FarmDetails              `json:"farm"`
 }
 
+type FarmResponse struct {
+	FarmDetails
+	Farmer FarmerResponse `json:"farmer"`
+}
 type FarmerResponse struct {
 	ID             int         `json:"id"`
 	FirstName      string      `json:"first_name"`

@@ -36,8 +36,13 @@ func (h *Handler) GetApplicationByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	application, err := h.applService.GetApplicationByID(r.Context(), applicationID)
+
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, err)
+		if err.Error() == "application not found" {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
 

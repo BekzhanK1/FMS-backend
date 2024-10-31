@@ -4,7 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
+	"user-service/internal/utils"
 	"user-service/types"
+
+	"github.com/gorilla/mux"
 )
 
 func (h *Handler) CreateFarmHandler(w http.ResponseWriter, r *http.Request) {
@@ -27,4 +31,60 @@ func (h *Handler) CreateFarmHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintln(w, "Farm created successfully")
+}
+
+func (h *Handler) ListFarms(w http.ResponseWriter, r *http.Request) {
+	farms, err := h.farmService.ListFarms()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := utils.WriteJSON(w, http.StatusOK, farms); err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+	}
+}
+
+func (h *Handler) GetFarmByID(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid farm ID", http.StatusBadRequest)
+		return
+	}
+
+	farm, err := h.farmService.GetFarmByID(id)
+	if err != nil {
+		if err.Error() == "farm not found" {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+
+	if err := utils.WriteJSON(w, http.StatusOK, farm); err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+	}
+}
+
+func (h *Handler) ListFarmsByFarmerID(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	farmerID, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid farmer ID", http.StatusBadRequest)
+		return
+	}
+
+	farms, err := h.farmService.ListFarmsByFarmerID(farmerID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := utils.WriteJSON(w, http.StatusOK, farms); err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+	}
 }

@@ -68,6 +68,9 @@ func (s *ApplicationService) GetApplicationByID(ctx context.Context, id int) (*t
 	if !isAdmin && application.Farmer.ID != userId {
 		return nil, fmt.Errorf("application with ID %d not found", id)
 	}
+	if application == nil {
+		return nil, fmt.Errorf("application not found")
+	}
 
 	return application, nil
 }

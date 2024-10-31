@@ -68,7 +68,7 @@ func (s *ApplicationStore) ListApplications() ([]*types.ApplicationResponse, err
 	}
 	defer rows.Close()
 
-	var applications []*types.ApplicationResponse
+	applications := make([]*types.ApplicationResponse, 0)
 	for rows.Next() {
 		var app types.ApplicationResponse
 
@@ -166,7 +166,10 @@ func (s *ApplicationStore) GetApplicationByID(id int) (*types.ApplicationRespons
 		&app.Farm.Size,
 		&app.Farm.CropTypes,
 	)
-	if err != nil {
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	} else if err != nil {
 		return nil, fmt.Errorf("could not get application by ID: %w", err)
 	}
 	return app, nil
@@ -210,7 +213,7 @@ func (s *ApplicationStore) ListApplicationsByFarmerID(farmerID int) ([]*types.Ap
 	}
 	defer rows.Close()
 
-	var applications []*types.ApplicationResponse
+	applications := make([]*types.ApplicationResponse, 0)
 	for rows.Next() {
 		var app types.ApplicationResponse
 
