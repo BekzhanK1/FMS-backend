@@ -49,30 +49,29 @@ func (h *Service) CreateUser(email, username, first_name, last_name, phone, pass
 		return "", err
 	}
 
-	switch user.Role {
-	case models.Farmer:
+	if user.Role == models.Farmer || user.Role == models.Buyer {
 		farmerInfo := &models.FarmerInfo{
 			FarmerID:   user.ID,
 			Rating:     0.0,
 			Experience: 0,
 			Bio:        "",
 		}
-		err = h.farmerInfoStore.CreateFarmerInfo(farmerInfo)
-		if err != nil {
-				return "", err
-		}
-	case models.Buyer:
+
 		buyerInfo := &models.BuyerInfo{
-			BuyerID: user.ID,
+			BuyerID:         user.ID,
 			DeliveryAddress: "",
-			PaymentMethod: "",
+			PaymentMethod:   "",
 		}
 		err = h.buyerInfoStore.CreateBuyerInfo(buyerInfo)
 		if err != nil {
 			return "", err
 		}
-	}
 
+		err = h.farmerInfoStore.CreateFarmerInfo(farmerInfo)
+		if err != nil {
+			return "", err
+		}
+	}
 
 	OtpCode, encryptedEmail, err := h.otpStore.CreateOTP(user)
 	if err != nil {
@@ -181,6 +180,37 @@ func (s *Service) ActivateUser(encryptedEmail string, otpCode string) error {
 
 	if err = s.otpStore.DeleteOTP(user.ID); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (s *Service) SwitchUserRole(userID int, role string) error {
+	roleEnum, err := models.ParseRole(role)
+	if err != nil {
+		return fmt.Errorf("invalid role")
+	}
+
+	if roleEnum == models.Admin {
+		return fmt.Errorf("role is not allowed")
+	}
+
+	user, err := s.userStore.GetUserById(userID)
+	if err != nil {
+		return fmt.Errorf("could not retrieve user: %w", err)
+	}
+
+	if user == nil {
+		return fmt.Errorf("user not found")
+	}
+
+	if user.Role == roleEnum || user.Role == models.Admin {
+		return fmt.Errorf("user already has the role %s", role)
+	}
+
+	user.Role = roleEnum
+	if err = s.userStore.UpdateUser(userID, user); err != nil {
+		return fmt.Errorf("could not update user role: %w", err)
 	}
 
 	return nil

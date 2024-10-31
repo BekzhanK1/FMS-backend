@@ -13,7 +13,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-
 func (h *Handler) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	var payload types.CreateUserPayload
 	if err := utils.ParseJSON(r, &payload); err != nil {
@@ -132,13 +131,12 @@ func (h *Handler) ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
-	
+
 	user, err := h.userService.GetUserById(userID)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
-
 
 	if err = utils.WriteJSON(w, http.StatusOK, user); err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
@@ -146,3 +144,28 @@ func (h *Handler) ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *Handler) SwitchUserRoleHandler(w http.ResponseWriter, r *http.Request) {
+	userID, err := auth.GetUserIDFromContext(r.Context())
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	role := r.URL.Query().Get("role")
+	if role == "" {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("role is not indicated"))
+		return
+	}
+
+	err = h.userService.SwitchUserRole(userID, role)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err = utils.WriteJSON(w, http.StatusOK, map[string]string{"msg": "Role switched successfully"}); err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+}

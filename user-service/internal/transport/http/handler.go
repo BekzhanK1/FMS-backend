@@ -31,6 +31,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 	protected := router.PathPrefix("").Subrouter()
 	protected.Use(middleware.AuthMiddleware)
 	protected.HandleFunc("/profile", h.ProfileHandler).Methods(http.MethodGet)
+	protected.HandleFunc("/switch-role", h.SwitchUserRoleHandler).Methods(http.MethodPut)
 
 	protected.HandleFunc("/farms", h.CreateFarmHandler).Methods(http.MethodPost)
 	protected.HandleFunc("/farms", h.ListFarms).Methods(http.MethodGet)
