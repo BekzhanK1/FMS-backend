@@ -34,6 +34,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 	protected.HandleFunc("/farms", h.CreateFarmHandler).Methods(http.MethodPost)
 	protected.HandleFunc("/applications", h.ListApplications).Methods(http.MethodGet)
 	protected.HandleFunc("/applications/{id}", h.GetApplicationByID).Methods(http.MethodGet)
+	protected.HandleFunc("/applications/{id}", h.UpdateApplication).Methods(http.MethodPut)
 	protected.HandleFunc("/applications/farmer/{id}", h.ListApplicationsByFarmerID).Methods(http.MethodGet)
 
 	router.HandleFunc("/register", h.CreateUserHandler).Methods(http.MethodPost)

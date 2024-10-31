@@ -2,14 +2,12 @@ package models
 
 import "time"
 
-
 type ApplicationStatus string
 
 const (
-	StatusPending    ApplicationStatus = "pending"
-	StatusApproved   ApplicationStatus = "approved"
-	StatusRejected   ApplicationStatus = "rejected"
-	StatusUnderReview ApplicationStatus = "under_review"
+	StatusPending  ApplicationStatus = "pending"
+	StatusApproved ApplicationStatus = "approved"
+	StatusRejected ApplicationStatus = "rejected"
 )
 
 type Application struct {

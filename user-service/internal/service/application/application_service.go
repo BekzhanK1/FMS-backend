@@ -93,6 +93,43 @@ func (s *ApplicationService) ListApplicationsByFarmerID(ctx context.Context, far
 	return applications, nil
 }
 
+func (s *ApplicationService) UpdateApplication(ctx context.Context, id int, payload types.ApplicationUpdatePayload) error {
+	userId, err := auth.GetUserIDFromContext(ctx)
+	if err != nil {
+		return fmt.Errorf("error retrieving user ID from context: %w", err)
+	}
+
+	isAdmin, err := s.isAdmin(userId)
+	if err != nil {
+		return err
+	}
+	if !isAdmin {
+		return fmt.Errorf("user with ID %d is not authorized to update application with ID %d", userId, id)
+	}
+
+	if payload.Status == "" {
+		return fmt.Errorf("status is required")
+	}
+
+	if payload.Status != "approved" && payload.Status != "rejected" {
+		return fmt.Errorf("status must be 'approved', 'rejected'")
+	}
+
+	if payload.Status == "approved" {
+		payload.RejectionReason = ""
+	}
+
+	if payload.Status == "rejected" && payload.RejectionReason == "" {
+		return fmt.Errorf("rejection reason is required for rejected applications")
+	}
+
+	err = s.applicationStore.UpdateApplication(id, payload.Status, payload.RejectionReason)
+	if err != nil {
+		return fmt.Errorf("error updating application with ID %d: %w", id, err)
+	}
+	return nil
+}
+
 func (s *ApplicationService) isAdmin(userId int) (bool, error) {
 	user, err := s.userStore.GetUserById(userId)
 	if err != nil {

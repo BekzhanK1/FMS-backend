@@ -54,7 +54,7 @@ type ApplicationStore interface {
 	ListApplications() ([]*ApplicationResponse, error)
 	ListApplicationsByFarmerID(farmerID int) ([]*ApplicationResponse, error)
 	GetApplicationByID(id int) (*ApplicationResponse, error)
-	UpdateApplication(id int, status string, rejectionReason *string) error
+	UpdateApplication(id int, status models.ApplicationStatus, rejectionReason string) error
 }
 
 type CreateUserPayload struct {
@@ -117,6 +117,11 @@ type CreateFarmPayload struct {
 	CropTypes string `json:"crop_types"`
 	// FarmerDocument  *multipart.FileHeader `json:"farmer_document" validate:"required"`
 	// FarmDocument    *multipart.FileHeader `json:"farm_documment" validate:"required"`
+}
+
+type ApplicationUpdatePayload struct {
+	Status          models.ApplicationStatus `json:"status" validate:"required,oneof=pending approved rejected under_review"`
+	RejectionReason string                   `json:"rejection_reason" validate:"omitempty"`
 }
 
 // RESPONSE STRUCTS

@@ -251,12 +251,27 @@ func (s *ApplicationStore) ListApplicationsByFarmerID(farmerID int) ([]*types.Ap
 	return applications, nil
 }
 
-func (s *ApplicationStore) UpdateApplication(id int, status string, rejectionReason *string) error {
+func (s *ApplicationStore) UpdateApplication(id int, status models.ApplicationStatus, rejectionReason string) error {
 	query := `UPDATE applications SET status = $1, rejection_reason = $2 WHERE id = $3`
 	_, err := s.db.Exec(query, status, rejectionReason, id)
 	if err != nil {
 		return fmt.Errorf("could not update application: %w", err)
 	}
+
+	switch status {
+	case models.StatusRejected:
+		fmt.Println("Application rejected successfully")
+		return nil
+	case models.StatusApproved:
+		query := `UPDATE farms SET is_verified = true WHERE id = (SELECT farm_id FROM applications WHERE id = $1)`
+		_, err := s.db.Exec(query, id)
+		if err != nil {
+			return fmt.Errorf("could not update farm verification status: %w", err)
+		}
+		fmt.Println("Application approved successfully")
+		return nil
+	}
+
 	fmt.Println("Application updated successfully")
 	return nil
 }
