@@ -25,6 +25,8 @@ func NewService(userStore types.UserStore, otpStore types.OTPStore, farmerInfoSt
 	}
 }
 
+const otpTemplatePath = "internal/templates/activation_otp.html"
+
 func (h *Service) CreateUser(email, username, first_name, last_name, phone, passwordHash string, isActive bool, role models.Role, profilePicture string) (string, error) {
 	if role == models.Admin {
 		return "", fmt.Errorf("cannot create admin user")
@@ -77,7 +79,10 @@ func (h *Service) CreateUser(email, username, first_name, last_name, phone, pass
 	if err != nil {
 		return "", err
 	}
-	utils.SendEmail(email, "Your OTP: %s", OtpCode)
+	otpData := utils.OTPData{
+		OtpCode: OtpCode,
+	}
+	utils.SendEmail(user.Email, "Your OTP Code", otpData, otpTemplatePath)
 
 	return encryptedEmail, nil
 }
@@ -161,7 +166,10 @@ func (s *Service) ActivateUser(encryptedEmail string, otpCode string) error {
 			return fmt.Errorf("couldn't regenerate OTP: %w", err)
 		}
 
-		utils.SendEmail(user.Email, "OTP Code", newOtpCode)
+		otpData := utils.OTPData{
+			OtpCode: newOtpCode,
+		}
+		utils.SendEmail(user.Email, "Your OTP Code", otpData, otpTemplatePath)
 
 		return fmt.Errorf("OTP is expired, a new OTP has been sent to email %s", user.Email)
 	}
