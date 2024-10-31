@@ -19,5 +19,6 @@ func NewHanlder(documentService documentService.Service) *Handler {
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("", h.CreateDocumentHandler).Methods(http.MethodPost)
-	router.HandleFunc("/{farmerId}", h.GetDocumentHandler).Methods(http.MethodGet)
+	router.HandleFunc("", h.GetIDsHandler).Methods(http.MethodGet)
+	router.HandleFunc("/{fileId}", h.GetDocumentHandler).Methods(http.MethodGet)
 }

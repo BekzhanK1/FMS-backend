@@ -2,11 +2,11 @@ package service
 
 import (
 	"context"
-	"document-service/internal/models"
 	"document-service/types"
-	"time"
-
+	"io"
 	"log"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Service struct {
@@ -19,26 +19,29 @@ func NewService(documentStore types.DocumentStore) *Service {
 	}
 }
 
-func (s *Service) GetByFarmerID(ctx context.Context, farmerId int) (*models.Document, error) {
-	document, err := s.documentStore.GetByFarmerID(ctx, farmerId)
+func (s *Service) GetFileIDs(ctx context.Context) ([]primitive.ObjectID, error) {
+	ids, err := s.documentStore.GetFileIDs(ctx)
 	if err != nil {
-		log.Fatalf("error when getting document: %s", err)
+		log.Fatalf("error when getting ids: %s", err)
 		return nil, err
 	}
-	return document, nil
+
+	return ids, nil
 }
 
-func (s *Service) CreateDocument(ctx context.Context, payload types.CreateDocumentPayload) (string, error) {
-	document := &models.Document{
-		FileName:   payload.FileName,
-		UploadDate: time.Now(),
-		FileSize:   0,
-		FarmerId:   payload.FarmerId,
-		Status:     string(types.Pending),
-	}
-
-	id, err := s.documentStore.CreateDocument(ctx, document)
+func (s *Service) GetFileByID(ctx context.Context, id primitive.ObjectID, destination io.Writer) error {
+	err := s.documentStore.GetFileByID(ctx, id, destination)
 	if err != nil {
+		log.Fatalf("error when getting file: %s", err)
+		return err
+	}
+	return nil
+}
+
+func (s *Service) CreateFile(ctx context.Context, payload types.CreateDocumentPayload) (string, error) {
+	id, err := s.documentStore.CreateFile(ctx, payload)
+	if err != nil {
+		log.Fatalf("error when creating file: %s", err)
 		return "", nil
 	}
 

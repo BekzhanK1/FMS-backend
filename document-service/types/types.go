@@ -2,17 +2,21 @@ package types
 
 import (
 	"context"
-	"document-service/internal/models"
+	"io"
+	"mime/multipart"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type DocumentStore interface {
-	GetByFarmerID(context.Context, int) (*models.Document, error)
-	CreateDocument(context.Context, *models.Document) (string, error)
+	GetFileIDs(context.Context) ([]primitive.ObjectID, error)
+	GetFileByID(context.Context, primitive.ObjectID, io.Writer) error
+	CreateFile(context.Context, CreateDocumentPayload) (string, error)
 }
 
 type CreateDocumentPayload struct {
-	FileName string `json:"file_name" validate:"required"` // Original file name
-	FarmerId int    `json:"farmer_id" validate:"required"` // ID of the user who uploaded the file
+	FileHeader multipart.FileHeader
+	File       multipart.File
 }
 
 type Status string
