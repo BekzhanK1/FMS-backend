@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"user-service/internal/models"
-	"user-service/internal/utils"
+	"user-service/internal/helpers"
 )
 
 type OTPStore struct {
@@ -18,13 +18,13 @@ func NewOTPStore(db *sql.DB) *OTPStore {
 }
 
 func (s *OTPStore) CreateOTP(user *models.User) (string, string, error) {
-	encryptedEmail, err := utils.Encrypt(user.Email)
+	encryptedEmail, err := helpers.Encrypt(user.Email)
 	if err != nil {
 		return "", "", fmt.Errorf("could not encrypt email: %w", err)
 	}
 	otp := &models.OTP{
 		UserID:   user.ID,
-		OTP_Code: utils.GenerateOTP(),
+		OTP_Code: helpers.GenerateOTP(),
 	}
 
 	query := `

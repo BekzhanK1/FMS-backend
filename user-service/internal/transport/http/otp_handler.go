@@ -3,7 +3,7 @@ package http
 import (
 	"fmt"
 	"net/http"
-	"user-service/internal/utils"
+	"user-service/shared/utils"
 )
 
 type ActivateUserRequest struct {

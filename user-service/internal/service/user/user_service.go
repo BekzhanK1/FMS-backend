@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 	"time"
+	"user-service/internal/helpers"
 	"user-service/internal/models"
-	"user-service/internal/utils"
 	"user-service/types"
 )
 
@@ -23,7 +23,7 @@ func NewService(userStore types.UserStore, otpStore types.OTPStore, farmerInfoSt
 	}
 }
 
-func (h *Service) CreateUser(email, username, first_name, last_name, phone, passwordHash string, isActive bool, role models.Role, profilePicture string) (string, error) {
+func (s *Service) CreateUser(email, username, first_name, last_name, phone, passwordHash string, isActive bool, role models.Role, profilePicture string) (string, error) {
 	if role == models.Admin {
 		return "", fmt.Errorf("cannot create admin user")
 	}
@@ -42,7 +42,7 @@ func (h *Service) CreateUser(email, username, first_name, last_name, phone, pass
 		UpdatedAt:      time.Now(),
 	}
 
-	user, err := h.userStore.CreateUser(userObject)
+	user, err := s.userStore.CreateUser(userObject)
 	if err != nil {
 		return "", err
 	}
@@ -55,17 +55,17 @@ func (h *Service) CreateUser(email, username, first_name, last_name, phone, pass
 			Bio:        "",
 			IsVerified: false,
 		}
-		err = h.farmerInfoStore.CreateFarmerInfo(farmerInfo)
+		err = s.farmerInfoStore.CreateFarmerInfo(farmerInfo)
 		if err != nil {
 			return "", err
 		}
 	}
 
-	OtpCode, encryptedEmail, err := h.otpStore.CreateOTP(user)
+	OtpCode, encryptedEmail, err := s.otpStore.CreateOTP(user)
 	if err != nil {
 		return "", err
 	}
-	utils.SendEmail(email, "Your OTP: %s", OtpCode)
+	helpers.SendEmail(email, "Your OTP: %s", OtpCode)
 
 	return encryptedEmail, nil
 }
@@ -116,7 +116,7 @@ func (s *Service) GetUserByEmail(email string) (*models.User, error) {
 }
 
 func (s *Service) ActivateUser(encryptedEmail string, otpCode string) error {
-	userEmail, err := utils.Decrypt(encryptedEmail)
+	userEmail, err := helpers.Decrypt(encryptedEmail)
 	if err != nil {
 		return fmt.Errorf("could not decrypt email: %w", err)
 	}
@@ -132,14 +132,14 @@ func (s *Service) ActivateUser(encryptedEmail string, otpCode string) error {
 		return fmt.Errorf("could not get token: %w", err)
 	}
 
-	if otp.ExpiresAt.Before(utils.GetCurrentTime()) {
-		newOtpCode := utils.GenerateOTP()
+	if otp.ExpiresAt.Before(helpers.GetCurrentTime()) {
+		newOtpCode := helpers.GenerateOTP()
 		err = s.otpStore.RegenerateOTP(user.ID, newOtpCode)
 		if err != nil {
 			return fmt.Errorf("couldn't regenerate OTP: %w", err)
 		}
 
-		utils.SendEmail(user.Email, "OTP Code", newOtpCode)
+		helpers.SendEmail(user.Email, "OTP Code", newOtpCode)
 
 		return fmt.Errorf("OTP is expired, a new OTP has been sent to email %s", user.Email)
 	}

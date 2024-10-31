@@ -21,9 +21,9 @@ type TokenStore interface {
 
 type OTPStore interface {
 	CreateOTP(*models.User) (string, string, error)
-	DeleteOTP(int) (error)
+	DeleteOTP(int) error
 	GetOTPByUserId(int) (*models.OTP, error)
-	RegenerateOTP(int, string) (error)
+	RegenerateOTP(int, string) error
 }
 
 type FarmerInfoStore interface {
@@ -32,7 +32,6 @@ type FarmerInfoStore interface {
 	GetFarmerInfoByFarmerId(int) (*models.FarmerInfo, error)
 	DeleteFarmerInfo(int) error
 }
-	
 
 type CreateUserPayload struct {
 	Email          string      `json:"email" validate:"required"`
@@ -40,7 +39,7 @@ type CreateUserPayload struct {
 	FirstName      string      `json:"first_name" validate:"omitempty"`
 	LastName       string      `json:"last_name" validate:"omitempty"`
 	Phone          string      `json:"phone" validate:"required"`
-	Password   	   string      `json:"password" validate:"required"`
+	Password       string      `json:"password" validate:"required"`
 	Role           models.Role `json:"role" validate:"required,oneof=Farmer Buyer Admin"`
 	ProfilePicture string      `json:"profile_picture" validate:"omitempty"`
 }
@@ -74,4 +73,3 @@ type LoginPayload struct {
 	Email    string `json:"email" validate:"required"`
 	Password string `json:"password" validate:"required"`
 }
-

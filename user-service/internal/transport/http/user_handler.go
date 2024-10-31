@@ -1,12 +1,11 @@
 package http
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 	"user-service/internal/middleware"
-	"user-service/internal/utils"
+	"user-service/shared/utils"
 	"user-service/types"
 
 	"github.com/go-playground/validator/v10"
@@ -47,24 +46,23 @@ func (h *Handler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid id: %v", err))
 		return
 	}
 
 	user, err := h.userService.GetUserById(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	if user == nil {
-		http.NotFound(w, r)
+		utils.WriteError(w, http.StatusNotFound, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(user); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if err = utils.WriteJSON(w, http.StatusOK, user); err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
 }

@@ -11,7 +11,7 @@ import (
 	authService "user-service/internal/service/auth"
 	userService "user-service/internal/service/user"
 	httpHandler "user-service/internal/transport/http"
-	adminutils "user-service/internal/utils/adminutils"
+	"user-service/internal/helpers/adminutils"
 )
 
 func Run() {
