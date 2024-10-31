@@ -21,9 +21,9 @@ type TokenStore interface {
 
 type OTPStore interface {
 	CreateOTP(*models.User) (string, string, error)
-	DeleteOTP(int) (error)
+	DeleteOTP(int) error
 	GetOTPByUserId(int) (*models.OTP, error)
-	RegenerateOTP(int, string) (error)
+	RegenerateOTP(int, string) error
 }
 
 type FarmerInfoStore interface {
@@ -51,17 +51,11 @@ type FarmStore interface {
 
 type ApplicationStore interface {
 	CreateApplication(application *models.Application) error
-	ListApplications() ([]*models.Application, error)
-	ListApplicationsWithDetails() ([]*ApplicationResponse, error)
+	ListApplications() ([]*ApplicationResponse, error)
+	ListApplicationsByFarmerID(farmerID int) ([]*ApplicationResponse, error)
+	GetApplicationByID(id int) (*ApplicationResponse, error)
 	UpdateApplication(id int, status string, rejectionReason *string) error
-	GetApplicationByID(id int) (*models.Application, error)
-	GetApplicationByFarmID(farmID int) (*models.Application, error)
-	GetApplicationsByFarmerID(farmerID int) ([]*models.Application, error)
 }
-
-
-
-	
 
 type CreateUserPayload struct {
 	Email          string      `json:"email" validate:"required"`
@@ -69,19 +63,19 @@ type CreateUserPayload struct {
 	FirstName      string      `json:"first_name" validate:"omitempty"`
 	LastName       string      `json:"last_name" validate:"omitempty"`
 	Phone          string      `json:"phone" validate:"required"`
-	Password   	   string      `json:"password" validate:"required"`
+	Password       string      `json:"password" validate:"required"`
 	Role           models.Role `json:"role" validate:"required,oneof=Farmer Buyer Admin"`
 	ProfilePicture string      `json:"profile_picture" validate:"omitempty"`
 }
 
 type UserResponse struct {
-	ID             int    `json:"id"`
-	Email          string `json:"email"`
-	Username       string `json:"username"`
-	FirstName      string `json:"first_name"`
-	LastName       string `json:"last_name"`
-	Phone          string `json:"phone_number"`
-	ProfilePicture string `json:"profile_picture_url"`
+	ID             int         `json:"id"`
+	Email          string      `json:"email"`
+	Username       string      `json:"username"`
+	FirstName      string      `json:"first_name"`
+	LastName       string      `json:"last_name"`
+	Phone          string      `json:"phone_number"`
+	ProfilePicture string      `json:"profile_picture_url"`
 	Role           models.Role `json:"role"`
 }
 
@@ -116,50 +110,45 @@ type LoginPayload struct {
 }
 
 type CreateFarmPayload struct {
-	Name       		string `json:"name" validate:"required"`
-	Address    		string `json:"address"`
-	GeoLoc     		string `json:"geo_loc"`
-	Size       		string `json:"size"`
-	CropTypes  		string `json:"crop_types"`
+	Name      string `json:"name" validate:"required"`
+	Address   string `json:"address"`
+	GeoLoc    string `json:"geo_loc"`
+	Size      string `json:"size"`
+	CropTypes string `json:"crop_types"`
 	// FarmerDocument  *multipart.FileHeader `json:"farmer_document" validate:"required"`
 	// FarmDocument    *multipart.FileHeader `json:"farm_documment" validate:"required"`
 }
 
-
-
-
-
 // RESPONSE STRUCTS
 
 type ApplicationResponse struct {
-    ID              int                `json:"id"`
-    Status          models.ApplicationStatus  `json:"status"`
-    RejectionReason string             `json:"rejection_reason"`
-    CreatedAt       time.Time          `json:"created_at"`
-    Farmer          FarmerResponse     `json:"farmer"`
-    Farm            FarmDetails        `json:"farm"`
+	ID              int                      `json:"id"`
+	Status          models.ApplicationStatus `json:"status"`
+	RejectionReason string                   `json:"rejection_reason"`
+	CreatedAt       time.Time                `json:"created_at"`
+	Farmer          FarmerResponse           `json:"farmer"`
+	Farm            FarmDetails              `json:"farm"`
 }
 
 type FarmerResponse struct {
-    ID             int     `json:"id"`
-    FirstName      string  `json:"first_name"`
-    LastName       string  `json:"last_name"`
-    Username       string  `json:"username"`
-    Email          string  `json:"email"`
-    Phone          string  `json:"phone_number"`
-    ProfilePicture string  `json:"profile_picture_url"`
-    Role           models.Role    `json:"role"`
-	Rating     float32 `json:"rating"`
-    Experience int     `json:"experience"`
-    Bio        string  `json:"bio"`
+	ID             int         `json:"id"`
+	FirstName      string      `json:"first_name"`
+	LastName       string      `json:"last_name"`
+	Username       string      `json:"username"`
+	Email          string      `json:"email"`
+	Phone          string      `json:"phone_number"`
+	ProfilePicture string      `json:"profile_picture_url"`
+	Role           models.Role `json:"role"`
+	Rating         float32     `json:"rating"`
+	Experience     int         `json:"experience"`
+	Bio            string      `json:"bio"`
 }
 
 type FarmDetails struct {
-    ID        int    `json:"id"`
-    Name      string `json:"name"`
-    Address   string `json:"address"`
-    GeoLoc    string `json:"geo_loc"`
-    Size      string `json:"size"`
-    CropTypes string `json:"crop_types"`
+	ID        int    `json:"id"`
+	Name      string `json:"name"`
+	Address   string `json:"address"`
+	GeoLoc    string `json:"geo_loc"`
+	Size      string `json:"size"`
+	CropTypes string `json:"crop_types"`
 }
-

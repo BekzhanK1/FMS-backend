@@ -25,6 +25,7 @@ func Run() {
 
 	r := mux.NewRouter()
 
+	// Setup services and handlers as before
 	userStore := store.NewUserStore(db)
 	tokenStore := store.NewTokenStore(db)
 	otpStore := store.NewOTPStore(db)
@@ -44,11 +45,28 @@ func Run() {
 	userRouter := r.PathPrefix("/users").Subrouter()
 	userHandler.RegisterRoutes(userRouter)
 
+	// Apply CORS middleware to the main router
+	corsRouter := enableCors(r)
+
 	log.Println("Starting server on :8080")
-	err = http.ListenAndServe(":8080", r)
+	err = http.ListenAndServe(":8080", corsRouter) // Use corsRouter here
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
+func enableCors(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*") // Allow all origins
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
+		// Handle preflight requests
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}

@@ -29,41 +29,8 @@ func (s *ApplicationStore) CreateApplication(application *models.Application) er
 	return nil
 }
 
-func (s *ApplicationStore) ListApplications() ([]*models.Application, error) {
-	query := `SELECT id, farmer_id, farm_id, status, rejection_reason, created_at FROM applications`
-	rows, err := s.db.Query(query)
-	if err != nil {
-		return nil, fmt.Errorf("could not list applications: %w", err)
-	}
-	defer rows.Close()
-
-	var applications []*models.Application
-	for rows.Next() {
-		application := &models.Application{}
-		err = rows.Scan(
-			&application.ID,
-			&application.FarmerID,
-			&application.FarmID,
-			&application.Status,
-			&application.RejectionReason,
-			&application.CreatedAt,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("could not scan application: %w", err)
-		}
-		applications = append(applications, application)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("error while listing applications: %w", err)
-	}
-
-	return applications, nil
-}
-
-
-func (s *ApplicationStore) ListApplicationsWithDetails() ([]*types.ApplicationResponse, error) {
-    query := `
+func (s *ApplicationStore) ListApplications() ([]*types.ApplicationResponse, error) {
+	query := `
     SELECT 
         a.id AS application_id,
         a.status,
@@ -94,55 +61,195 @@ func (s *ApplicationStore) ListApplicationsWithDetails() ([]*types.ApplicationRe
     LEFT JOIN farmer_info fi ON fi.farmer_id = u.id
     JOIN farms f ON a.farm_id = f.id;
     `
-    
-    rows, err := s.db.Query(query)
-    if err != nil {
-        return nil, fmt.Errorf("could not list applications with details: %w", err)
-    }
-    defer rows.Close()
 
-    var applications []*types.ApplicationResponse
-    for rows.Next() {
-        var app types.ApplicationResponse
-        
-        // Scan into struct fields
-        err = rows.Scan(
-            &app.ID,
-            &app.Status,
-            &app.RejectionReason,
-            &app.CreatedAt,
-            &app.Farmer.ID,
-            &app.Farmer.FirstName,
-            &app.Farmer.LastName,
-            &app.Farmer.Username,
-            &app.Farmer.Email,
-            &app.Farmer.Phone,
-            &app.Farmer.ProfilePicture,
-            &app.Farmer.Role,
-            &app.Farmer.Rating,
-            &app.Farmer.Experience,
-            &app.Farmer.Bio,
-            &app.Farm.ID,
-            &app.Farm.Name,
-            &app.Farm.Address,
-            &app.Farm.GeoLoc,
-            &app.Farm.Size,
-            &app.Farm.CropTypes,
-        )
-        if err != nil {
-            return nil, fmt.Errorf("could not scan application details: %w", err)
-        }
+	rows, err := s.db.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("could not list applications with details: %w", err)
+	}
+	defer rows.Close()
 
-        applications = append(applications, &app)
-    }
+	var applications []*types.ApplicationResponse
+	for rows.Next() {
+		var app types.ApplicationResponse
 
-    if err = rows.Err(); err != nil {
-        return nil, fmt.Errorf("error while listing applications with details: %w", err)
-    }
+		// Scan into struct fields
+		err = rows.Scan(
+			&app.ID,
+			&app.Status,
+			&app.RejectionReason,
+			&app.CreatedAt,
+			&app.Farmer.ID,
+			&app.Farmer.FirstName,
+			&app.Farmer.LastName,
+			&app.Farmer.Username,
+			&app.Farmer.Email,
+			&app.Farmer.Phone,
+			&app.Farmer.ProfilePicture,
+			&app.Farmer.Role,
+			&app.Farmer.Rating,
+			&app.Farmer.Experience,
+			&app.Farmer.Bio,
+			&app.Farm.ID,
+			&app.Farm.Name,
+			&app.Farm.Address,
+			&app.Farm.GeoLoc,
+			&app.Farm.Size,
+			&app.Farm.CropTypes,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("could not scan application details: %w", err)
+		}
 
-    return applications, nil
+		applications = append(applications, &app)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error while listing applications with details: %w", err)
+	}
+
+	return applications, nil
 }
 
+func (s *ApplicationStore) GetApplicationByID(id int) (*types.ApplicationResponse, error) {
+	query := `    SELECT 
+        a.id AS application_id,
+        a.status,
+        a.rejection_reason,
+        a.created_at AS application_created_at,
+        
+        u.id AS farmer_id,
+        u.first_name,
+        u.last_name,
+        u.username,
+        u.email,
+        u.phone_number,
+        u.profile_picture_url,
+        u.role,
+        
+        fi.rating,
+        fi.experience,
+        fi.bio,
+        
+        f.id AS farm_id,
+        f.name AS farm_name,
+        f.address AS farm_address,
+        f.geo_loc AS farm_geo_loc,
+        f.size AS farm_size,
+        f.crop_types AS farm_crop_types
+    FROM applications a 
+    JOIN users u ON a.farmer_id = u.id
+    LEFT JOIN farmer_info fi ON fi.farmer_id = u.id
+    JOIN farms f ON a.farm_id = f.id
+	WHERE a.id = $1;
+    `
+	app := &types.ApplicationResponse{}
+	err := s.db.QueryRow(query, id).Scan(
+		&app.ID,
+		&app.Status,
+		&app.RejectionReason,
+		&app.CreatedAt,
+		&app.Farmer.ID,
+		&app.Farmer.FirstName,
+		&app.Farmer.LastName,
+		&app.Farmer.Username,
+		&app.Farmer.Email,
+		&app.Farmer.Phone,
+		&app.Farmer.ProfilePicture,
+		&app.Farmer.Role,
+		&app.Farmer.Rating,
+		&app.Farmer.Experience,
+		&app.Farmer.Bio,
+		&app.Farm.ID,
+		&app.Farm.Name,
+		&app.Farm.Address,
+		&app.Farm.GeoLoc,
+		&app.Farm.Size,
+		&app.Farm.CropTypes,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("could not get application by ID: %w", err)
+	}
+	return app, nil
+}
+
+func (s *ApplicationStore) ListApplicationsByFarmerID(farmerID int) ([]*types.ApplicationResponse, error) {
+	query := `    SELECT 
+        a.id AS application_id,
+        a.status,
+        a.rejection_reason,
+        a.created_at AS application_created_at,
+        
+        u.id AS farmer_id,
+        u.first_name,
+        u.last_name,
+        u.username,
+        u.email,
+        u.phone_number,
+        u.profile_picture_url,
+        u.role,
+        
+        fi.rating,
+        fi.experience,
+        fi.bio,
+        
+        f.id AS farm_id,
+        f.name AS farm_name,
+        f.address AS farm_address,
+        f.geo_loc AS farm_geo_loc,
+        f.size AS farm_size,
+        f.crop_types AS farm_crop_types
+    FROM applications a 
+    JOIN users u ON a.farmer_id = u.id
+    LEFT JOIN farmer_info fi ON fi.farmer_id = u.id
+    JOIN farms f ON a.farm_id = f.id
+	WHERE u.id = $1;`
+
+	rows, err := s.db.Query(query, farmerID)
+	if err != nil {
+		return nil, fmt.Errorf("could not get applications by farmer ID: %w", err)
+	}
+	defer rows.Close()
+
+	var applications []*types.ApplicationResponse
+	for rows.Next() {
+		var app types.ApplicationResponse
+
+		err = rows.Scan(
+			&app.ID,
+			&app.Status,
+			&app.RejectionReason,
+			&app.CreatedAt,
+			&app.Farmer.ID,
+			&app.Farmer.FirstName,
+			&app.Farmer.LastName,
+			&app.Farmer.Username,
+			&app.Farmer.Email,
+			&app.Farmer.Phone,
+			&app.Farmer.ProfilePicture,
+			&app.Farmer.Role,
+			&app.Farmer.Rating,
+			&app.Farmer.Experience,
+			&app.Farmer.Bio,
+			&app.Farm.ID,
+			&app.Farm.Name,
+			&app.Farm.Address,
+			&app.Farm.GeoLoc,
+			&app.Farm.Size,
+			&app.Farm.CropTypes,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("could not scan application details: %w", err)
+		}
+
+		applications = append(applications, &app)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error while listing applications with details: %w", err)
+	}
+
+	return applications, nil
+}
 
 func (s *ApplicationStore) UpdateApplication(id int, status string, rejectionReason *string) error {
 	query := `UPDATE applications SET status = $1, rejection_reason = $2 WHERE id = $3`
@@ -152,78 +259,4 @@ func (s *ApplicationStore) UpdateApplication(id int, status string, rejectionRea
 	}
 	fmt.Println("Application updated successfully")
 	return nil
-}
-
-func (s *ApplicationStore) GetApplicationByID(id int) (*models.Application, error) {
-	query := `SELECT id, farmer_id, farm_id, status, rejection_reason, created_at FROM applications WHERE id = $1`
-	application := &models.Application{}
-	err := s.db.QueryRow(query, id).Scan(
-		&application.ID,
-		&application.FarmerID,
-		&application.FarmID,
-		&application.Status,
-		&application.RejectionReason,
-		&application.CreatedAt,
-	)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil 
-		}
-		return nil, fmt.Errorf("could not get application by ID: %w", err)
-	}
-
-	return application, nil
-}
-
-func (s *ApplicationStore) GetApplicationByFarmID(farmID int) (*models.Application, error) {
-	query := `SELECT id, farmer_id, farm_id, status, rejection_reason, created_at FROM applications WHERE farm_id = $1`
-	application := &models.Application{}
-	err := s.db.QueryRow(query, farmID).Scan(
-		&application.ID,
-		&application.FarmerID,
-		&application.FarmID,
-		&application.Status,
-		&application.RejectionReason,
-		&application.CreatedAt,
-	)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
-		return nil, fmt.Errorf("could not get application by farm ID: %w", err)
-	}
-
-	return application, nil
-}
-
-func (s *ApplicationStore) GetApplicationsByFarmerID(farmerID int) ([]*models.Application, error) {
-	query := `SELECT id, farmer_id, farm_id, status, rejection_reason, created_at FROM applications WHERE farmer_id = $1`
-	rows, err := s.db.Query(query, farmerID)
-	if err != nil {
-		return nil, fmt.Errorf("could not get applications by farmer ID: %w", err)
-	}
-	defer rows.Close()
-
-	var applications []*models.Application
-	for rows.Next() {
-		application := &models.Application{}
-		err = rows.Scan(
-			&application.ID,
-			&application.FarmerID,
-			&application.FarmID,
-			&application.Status,
-			&application.RejectionReason,
-			&application.CreatedAt,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("could not scan application: %w", err)
-		}
-		applications = append(applications, application)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("error while getting applications by farmer ID: %w", err)
-	}
-
-	return applications, nil
 }
