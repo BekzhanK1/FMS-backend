@@ -19,7 +19,7 @@ type Store struct {
 
 func NewStore(db *mongo.Database) *Store {
 	return &Store{
-		db: db.Collection("documents"),
+		db: db.Collection("fs.files"),
 	}
 }
 

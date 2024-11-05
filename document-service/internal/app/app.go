@@ -2,14 +2,15 @@ package app
 
 import (
 	"context"
+	"log"
+	"net"
+
+	"google.golang.org/grpc"
+
 	db "document-service/internal/database"
 	store "document-service/internal/repository"
 	"document-service/internal/service"
-	httpHandler "document-service/internal/transport/http"
-	"log"
-	"net/http"
-
-	"github.com/gorilla/mux"
+	handler "document-service/internal/transport/rpc"
 )
 
 func Run() {
@@ -20,18 +21,21 @@ func Run() {
 	defer mongoClient.Disconnect(context.TODO())
 
 	mongoDb := mongoClient.Database("fms")
-	
+
+	lis, err := net.Listen("tcp", ":5001")
+	if err != nil {
+		log.Fatalf("ERROR STARTING THE SERVER : %v", err)
+	}
+
+	grpcServer := grpc.NewServer()
+
 	documentStore := store.NewStore(mongoDb)
 	documentService := service.NewService(documentStore)
-	documentHandler := httpHandler.NewHanlder(*documentService)
 
-	r := mux.NewRouter()
+	handler.NewServer(grpcServer, documentService)
 
-	documentRouter := r.PathPrefix("/documents").Subrouter()
-	documentHandler.RegisterRoutes(documentRouter)
-
-	log.Println("Starting server on :8081")
-	err = http.ListenAndServe(":8081", r)
+	log.Println("Starting gprc server on :5001")
+	err = grpcServer.Serve(lis)
 	if err != nil {
 		log.Fatal(err)
 	}

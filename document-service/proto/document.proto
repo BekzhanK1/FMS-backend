@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package document;
+
+option go_package = "/document";
+
+
+service DocumentService {
+  rpc GetFileByID (GetFileRequest) returns (stream GetFileResponse);
+  rpc StoreFile (stream StoreFileRequest) returns (StoreFileResponse);
+  rpc GetFileIDs (GetIDsRequest) returns (GetIDsResponse);
+}
+
+message GetFileRequest {
+  string file_id = 1;
+}
+
+message GetFileResponse {
+  bytes file_chunk = 1;
+}
+
+message StoreFileRequest {
+  oneof data {
+    DocumentInfo info = 1;      // Metadata, sent initially
+    bytes file_chunk = 2;       // Actual document data, sent in chunks
+  }
+}
+
+message DocumentInfo {
+  string filename = 1;          // Name of the document
+  string mime_type = 2;         // MIME type of the document (e.g., application/pdf)
+}
+
+message StoreFileResponse {
+  string file_id = 1;
+}
+
+message GetIDsRequest {}
+
+message GetIDsResponse {
+  repeated string file_ids = 1;
+}
