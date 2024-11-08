@@ -1,8 +1,6 @@
 module user-service
 
-go 1.22.0
-
-toolchain go1.22.3
+go 1.22.3
 
 require (
 	github.com/golang-migrate/migrate/v4 v4.18.1
@@ -30,4 +28,7 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/joho/godotenv v1.5.1
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
+	user-service/shared v0.0.0-00010101000000-000000000000
 )
+
+replace user-service/shared => ../shared

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"user-service/internal/models"
-	"user-service/internal/utils"
+	"user-service/internal/helpers"
 )
 
 type UserStore struct {
@@ -18,7 +18,7 @@ func NewUserStore(db *sql.DB) *UserStore {
 }
 
 func (s *UserStore) CreateUser(user *models.User) (*models.User, error) {
-	hashedPassword, err := utils.HashPassword(user.PasswordHash)
+	hashedPassword, err := helpers.HashPassword(user.PasswordHash)
 	if err != nil {
 		return &models.User{}, fmt.Errorf("could not hash password: %w", err)
 	}
