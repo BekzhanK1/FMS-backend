@@ -6,10 +6,11 @@ import (
 	"net/http"
 	"time"
 	"user-service/internal/config"
+	"user-service/internal/helpers"
 	"user-service/internal/models"
-	"user-service/internal/utils"
+	"user-service/shared/utils"
 	"user-service/types"
-	
+
 	authService "user-service/internal/service/auth"
 )
 
@@ -34,7 +35,7 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	
-	if utils.CheckPasswordHash(payload.Password, user.PasswordHash) != nil{
+	if helpers.CheckPasswordHash(payload.Password, user.PasswordHash) != nil{
 		utils.WriteError(w, http.StatusUnauthorized, fmt.Errorf("invalid email or password"))
 		return
 	}

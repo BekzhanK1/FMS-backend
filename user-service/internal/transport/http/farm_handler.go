@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"user-service/internal/utils"
+	"user-service/shared/utils"
 	"user-service/types"
 
 	"github.com/gorilla/mux"
