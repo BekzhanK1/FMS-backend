@@ -1,0 +1,229 @@
+syntax = "proto3";
+
+package market;
+
+// Category Service
+service CategoryService {
+  rpc GetCategory (GetCategoryRequest) returns (CategoryResponse);
+  rpc ListCategories (ListCategoriesRequest) returns (ListCategoriesResponse);
+  rpc CreateCategory (CreateCategoryRequest) returns (CategoryResponse);
+  rpc UpdateCategory (UpdateCategoryRequest) returns (CategoryResponse);
+  rpc DeleteCategory (DeleteCategoryRequest) returns (DeleteCategoryResponse);
+}
+
+// Product Service
+service ProductService {
+  rpc GetProduct (GetProductRequest) returns (ProductResponse);
+  rpc ListProducts (ListProductsRequest) returns (ListProductsResponse);
+  rpc CreateProduct (CreateProductRequest) returns (ProductResponse);
+  rpc UpdateProduct (UpdateProductRequest) returns (ProductResponse);
+  rpc DeleteProduct (DeleteProductRequest) returns (DeleteProductResponse);
+}
+
+// Basket Service
+service BasketService {
+  rpc GetBasket (GetBasketRequest) returns (BasketResponse);
+  rpc AddBasketItem (AddBasketItemRequest) returns (BasketResponse);
+  rpc RemoveBasketItem (RemoveBasketItemRequest) returns (BasketResponse);
+  rpc CheckoutBasket (CheckoutBasketRequest) returns (OrderResponse);
+}
+
+// Order Service
+service OrderService {
+  rpc GetOrder (GetOrderRequest) returns (OrderResponse);
+  rpc ListOrders (ListOrdersRequest) returns (ListOrdersResponse);
+  rpc CreateOrder (CreateOrderRequest) returns (OrderResponse);
+  rpc UpdateOrderStatus (UpdateOrderStatusRequest) returns (OrderResponse);
+}
+
+// Image Service
+service ImageService {
+  rpc ListImagesByProduct (ListImagesByProductRequest) returns (ListImagesResponse);
+  rpc AddImage (AddImageRequest) returns (ImageResponse);
+  rpc DeleteImage (DeleteImageRequest) returns (DeleteImageResponse);
+}
+
+// ====== Messages ======
+
+// Category Messages
+message GetCategoryRequest {
+  int32 id = 1;
+}
+
+message ListCategoriesRequest {}
+
+message   CreateCategoryRequest {
+  string name = 1;
+  string description = 2;
+}
+
+message UpdateCategoryRequest {
+  int32 id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message DeleteCategoryRequest {
+  int32 id = 1;
+}
+
+message CategoryResponse {
+  int32 id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message ListCategoriesResponse {
+  repeated CategoryResponse categories = 1;
+}
+
+message DeleteCategoryResponse {
+  int32 id = 1;
+}
+
+// Product Messages
+message GetProductRequest {
+  int32 id = 1;
+}
+
+message ListProductsRequest {}
+
+message CreateProductRequest {
+  string name = 1;
+  int32 category_id = 2;
+  string description = 3;
+  float price = 4;
+  int32 quantity = 5;
+  float rating = 6;
+}
+
+message UpdateProductRequest {
+  int32 id = 1;
+  string name = 2;
+  int32 category_id = 3;
+  string description = 4;
+  float price = 5;
+  int32 quantity = 6;
+}
+
+message DeleteProductResponse {
+  int32 id = 1;
+}
+
+
+message DeleteProductRequest {
+  int32 id = 1;
+}
+
+message ProductResponse {
+  int32 id = 1;
+  string name = 2;
+  string description = 3;
+  float price = 4;
+  int32 quantity = 5;
+  float rating = 6;
+  int32 category_id = 7;
+  int32 popularity = 8;
+  int32 farm_id = 9;
+}
+
+message ListProductsResponse {
+  repeated ProductResponse products = 1;
+}
+
+// Basket Messages
+message GetBasketRequest {
+  int32 buyer_id = 1;
+}
+
+message AddBasketItemRequest {
+  int32 buyer_id = 1;
+  int32 product_id = 2;
+  int32 quantity = 3;
+}
+
+message RemoveBasketItemRequest {
+  int32 buyer_id = 1;
+  int32 product_id = 2;
+}
+
+message CheckoutBasketRequest {
+  int32 buyer_id = 1;
+}
+
+message BasketItemResponse {
+  int32 id = 1;
+  int32 product_id = 2;
+  int32 quantity = 3;
+  float total_price = 4;
+}
+
+message BasketResponse {
+  int32 id = 1;
+  int32 buyer_id = 2;
+  repeated BasketItemResponse items = 3;
+  float total_price = 4;
+  int32 total_items = 5;
+}
+
+// Order Messages
+message GetOrderRequest {
+  int32 id = 1;
+}
+
+message ListOrdersRequest {
+  int32 buyer_id = 1;
+}
+
+message CreateOrderRequest {
+  int32 buyer_id = 1;
+  float total_price = 2;
+}
+
+message UpdateOrderStatusRequest {
+  int32 id = 1;
+  string status = 2;
+}
+
+message OrderResponse {
+  int32 id = 1;
+  int32 buyer_id = 2;
+  float total_price = 3;
+  string status = 4;
+  string created_at = 5;
+  string updated_at = 6;
+}
+
+message ListOrdersResponse {
+  repeated OrderResponse orders = 1;
+}
+
+// Image Messages
+message ListImagesByProductRequest {
+  int32 product_id = 1;
+}
+
+message AddImageRequest {
+  int32 product_id = 1;
+  string image_url = 2;
+  bool is_primary = 3;
+}
+
+message DeleteImageRequest {
+  int32 id = 1;
+}
+
+message ImageResponse {
+  int32 id = 1;
+  int32 product_id = 2;
+  string image_url = 3;
+  bool is_primary = 4;
+}
+
+message ListImagesResponse {
+  repeated ImageResponse images = 1;
+}
+
+message DeleteImageResponse {
+  int32 id = 1;
+}

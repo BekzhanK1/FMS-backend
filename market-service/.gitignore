@@ -20,42 +20,11 @@ parts/
 sdist/
 var/
 wheels/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-
-# Django stuff:
-*.log
-*.pot
-*.pyc
-*.pyo
-*.pyd
-*.sqlite3
-db.sqlite3
-*.db
-*.sqlite3-journal
-*.dat
-*.csv
-*.pdb
-*.sav
-*.swo
-*.swp
-*.swn
-*.swm
-*.swo
-*.swn
-*.swm
-
-# If your build process includes running collectstatic, you probably don't need or want to include staticfiles/
-# in your repository. Update and uncomment the following line accordingly.
-# <django-project-name>/staticfiles/
-
-# Media files
-media/
-
-# Django migrations
-*/migrations/
-*.mo
+MANIFEST
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -70,13 +39,17 @@ pip-delete-this-directory.txt
 # Unit test / coverage reports
 htmlcov/
 .tox/
+.nox/
 .coverage
 .coverage.*
 .cache
 nosetests.xml
 coverage.xml
 *.cover
+*.py,cover
 .hypothesis/
+.pytest_cache/
+cover/
 
 # Translations
 *.mo
@@ -86,6 +59,7 @@ coverage.xml
 *.log
 local_settings.py
 db.sqlite3
+db.sqlite3-journal
 
 # Flask stuff:
 instance/
@@ -127,6 +101,7 @@ venv.bak/
 
 # Spyder project settings
 .spyderproject
+.spyproject
 
 # Rope project settings
 .ropeproject
@@ -141,3 +116,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# FastAPI specific
+*.db
+*.sqlite
