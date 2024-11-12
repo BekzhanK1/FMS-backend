@@ -5,7 +5,7 @@
 *.out
 
 # Exclude dependency directories
-/vendor
+# /vendor
 
 # Exclude version control files and directories
 .git
