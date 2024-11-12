@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   api-gateway:
@@ -29,7 +29,16 @@ services:
     volumes:
       - mongo_data:/data/db
 
+  market-service:
+    build: ./market-service
+    working_dir: /app
+    ports:
+      - "50051:50051"
+    container_name: market-service
+    volumes:
+      - ./market-service/test.db:/app/test.db
+    depends_on:
+      - mongo
+
 volumes:
   mongo_data:
-
-    
