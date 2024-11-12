@@ -77,7 +77,15 @@ message GetUserRequest {
 }
 
 message GetUserResponse {
-    User user = 1;
+    int32 id = 1;
+    string email = 2;
+    string username = 3;
+    string first_name = 4;
+    string last_name = 5;
+    string phone_number = 6;
+    Role role = 7;
+    string profile_picture_url = 8;
+    bool is_active = 9;
 }
 
 message DeleteUserRequest {

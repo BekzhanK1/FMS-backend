@@ -77,6 +77,7 @@ type UserResponse struct {
 	Phone          string      `json:"phone_number"`
 	ProfilePicture string      `json:"profile_picture_url"`
 	Role           models.Role `json:"role"`
+	IsActive       bool        `json:"is_active"`
 }
 
 type UpdateUserPayload struct {

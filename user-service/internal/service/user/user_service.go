@@ -98,6 +98,7 @@ func (s *Service) GetUserById(id int) (*types.UserResponse, error) {
 		Phone:          user.Phone,
 		ProfilePicture: user.ProfilePicture,
 		Role:           user.Role,
+		IsActive:       user.IsActive,
 	}
 	if err != nil {
 		log.Fatalf("error: %s", err)
@@ -109,13 +110,15 @@ func (s *Service) GetUserById(id int) (*types.UserResponse, error) {
 }
 
 func (s *Service) UpdateUser(id int, username, phone, profilePicture string, isActive bool) error {
-	user := &models.User{
-		Username:       username,
-		Phone:          phone,
-		IsActive:       isActive,
-		ProfilePicture: profilePicture,
-		UpdatedAt:      time.Now(),
+	user, err := s.userStore.GetUserById(id)
+
+	if err != nil {
+		return fmt.Errorf("could not get user: %w", err)
 	}
+
+	user.Username = username
+	user.Phone = phone
+	user.ProfilePicture = profilePicture
 
 	if err := s.userStore.UpdateUser(id, user); err != nil {
 		log.Fatalf("could not update user with id %d", id)

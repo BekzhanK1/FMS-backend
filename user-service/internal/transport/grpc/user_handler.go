@@ -8,6 +8,8 @@ import (
 	userService "user-service/internal/service/user"
 	pb "user-service/shared/protobufs/user-service"
 
+	"github.com/golang/protobuf/ptypes/empty"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -49,4 +51,52 @@ func (s *Server) ActivateUser(ctx context.Context, req *pb.ActivateUserRequest) 
 	}
 
 	return &pb.ActivateUserResponse{Message: "User activated successfully"}, nil
+}
+
+func (s *Server) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
+	user, err := s.userService.GetUserById(int(req.Id))
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get user: %v", err)
+	}
+
+	var role pb.Role
+	switch user.Role {
+	case models.Farmer:
+		role = pb.Role_FARMER
+	case models.Buyer:
+		role = pb.Role_BUYER
+	case models.Admin:
+		role = pb.Role_ADMIN
+	}
+
+	userResponse := &pb.GetUserResponse{
+		Id:                int32(user.ID),
+		Email:             user.Email,
+		Username:          user.Username,
+		FirstName:         user.FirstName,
+		LastName:          user.LastName,
+		PhoneNumber:       user.Phone,
+		Role:              role,
+		ProfilePictureUrl: user.ProfilePicture,
+		IsActive:          user.IsActive,
+	}
+	return userResponse, nil
+}
+
+func (s *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*empty.Empty, error) {
+	err := s.userService.UpdateUser(int(req.Id), req.Username, req.PhoneNumber, req.ProfilePicture, req.IsActive)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to update user: %v", err)
+	}
+
+	return &empty.Empty{}, nil
+}
+
+func (s *Server) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*pb.DeleteUserResponse, error) {
+	err := s.userService.DeleteUser(int(req.Id))
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to delete user: %v", err)
+	}
+
+	return &pb.DeleteUserResponse{Message: "Deleted user successfully"}, nil
 }

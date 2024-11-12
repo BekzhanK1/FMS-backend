@@ -3,8 +3,8 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"user-service/internal/models"
 	"user-service/internal/helpers"
+	"user-service/internal/models"
 )
 
 type UserStore struct {
@@ -84,16 +84,16 @@ func (s *UserStore) GetUserById(id int) (*models.User, error) {
 func (s *UserStore) UpdateUser(userId int, user *models.User) error {
 	query := `
 		UPDATE users
-		SET email = $1, username = $2, first_name = $3, last_name = $4, phone_number = $5, password_hash = $6, is_active = $7, role = $8, profile_picture_url = $9, updated_at = $10
-		WHERE id = $11
+		SET email = $1, username = $2, first_name = $3, last_name = $4, phone_number = $5, is_active = $6, role = $7, profile_picture_url = $8, updated_at = $9
+		WHERE id = $10
 	`
+
 	_, err := s.db.Exec(query,
 		user.Email,
 		user.Username,
 		user.FirstName,
 		user.LastName,
 		user.Phone,
-		user.PasswordHash,
 		user.IsActive,
 		user.Role,
 		user.ProfilePicture,
