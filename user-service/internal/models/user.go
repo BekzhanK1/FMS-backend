@@ -8,9 +8,9 @@ import (
 type Role string
 
 const (
-	Farmer Role = "Farmer"
-	Buyer  Role = "Buyer"
-	Admin  Role = "Admin"
+	Farmer Role = "FARMER"
+	Buyer  Role = "BUYER"
+	Admin  Role = "ADMIN"
 )
 
 type User struct {

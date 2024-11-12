@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 	"user-service/internal/config"
+	"user-service/internal/helpers"
 	"user-service/internal/middleware"
 	"user-service/internal/models"
 	"user-service/types"
@@ -15,12 +16,63 @@ import (
 
 type Service struct {
 	tokenStore types.TokenStore
+	userStore  types.UserStore
 }
 
-func NewService(tokenStore types.TokenStore) *Service {
+func NewService(tokenStore types.TokenStore, userStore types.UserStore) *Service {
 	return &Service{
 		tokenStore,
+		userStore,
 	}
+}
+
+func (s *Service) Login(email, password string) (types.Tokens, error) {
+	user, err := s.userStore.GetUserByEmail(email)
+	if err != nil {
+		return types.Tokens{}, fmt.Errorf("could not get user by email: %w", err)
+	}
+
+	if user == nil {
+		return types.Tokens{}, fmt.Errorf("invalid email or password")
+	}
+
+	if !user.IsActive {
+		return types.Tokens{}, fmt.Errorf("user is not active")
+	}
+
+	if err = helpers.CheckPasswordHash(password, user.PasswordHash); err != nil {
+		return types.Tokens{}, fmt.Errorf("invalid email or password")
+	}
+
+	tokens, err := CreateJWT(user.ID)
+	if err != nil {
+		return types.Tokens{}, fmt.Errorf("could not create JWT: %w", err)
+	}
+
+	token := &models.Token{
+		UserID:     user.ID,
+		Token:      tokens.RefreshToken,
+		Expiration: time.Now().Add(time.Duration(config.Envs.JwtExpRefreshToken) * time.Second),
+		UpdatedAt:  time.Now(),
+	}
+
+	existingToken, err := s.GetTokenByUserId(user.ID)
+	if err != nil {
+		return types.Tokens{}, fmt.Errorf("could not get token by user ID: %w", err)
+	}
+
+	if existingToken == nil {
+		if err := s.CreateToken(token); err != nil {
+			return types.Tokens{}, fmt.Errorf("could not create token: %w", err)
+		}
+	} else {
+		if err := s.UpdateTokenByUserId(user.ID, token); err != nil {
+			return types.Tokens{}, fmt.Errorf("could not update token: %w", err)
+		}
+	}
+
+	return tokens, nil
+
 }
 
 func CreateJWT(userID int) (types.Tokens, error) {
