@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build: ./api-gateway
+    working_dir: /app
+    ports:
+      - "8080:8080"
+    container_name: api-gateway
+    depends_on:
+      - document-service
+
+  document-service:
+    build: ./document-service
+    working_dir: /app
+    ports:
+      - "5001:5001"
+    container_name: document-service
+    env_file:
+      - ./document-service/.env
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:6.0
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
+
+    

@@ -2,11 +2,13 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 
 	"google.golang.org/grpc"
 
+	"document-service/internal/config"
 	db "document-service/internal/database"
 	store "document-service/internal/repository"
 	"document-service/internal/service"
@@ -22,7 +24,7 @@ func Run() {
 
 	mongoDb := mongoClient.Database("fms")
 
-	lis, err := net.Listen("tcp", ":5001")
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", config.Envs.PORT))
 	if err != nil {
 		log.Fatalf("ERROR STARTING THE SERVER : %v", err)
 	}
@@ -34,7 +36,7 @@ func Run() {
 
 	handler.NewServer(grpcServer, documentService)
 
-	log.Println("Starting gprc server on :5001")
+	log.Printf("Starting gprc server on :%s\n", config.Envs.PORT)
 	err = grpcServer.Serve(lis)
 	if err != nil {
 		log.Fatal(err)

@@ -1,0 +1,41 @@
+# Exclude Go build artifacts
+/bin
+/build
+*.exe
+*.out
+
+# Exclude dependency directories
+/vendor
+
+# Exclude version control files and directories
+.git
+.gitignore
+.gitattributes
+
+# Exclude editor and IDE files
+*.swp
+*.swo
+*.bak
+*.tmp
+*.orig
+*.log
+.idea
+.vscode
+*.iml
+
+# Exclude system files
+.DS_Store
+Thumbs.db
+node_modules
+
+# Exclude test files and results
+*_test.go
+test-results/
+
+# Exclude environment and configuration files (if not needed)
+.env
+config.local.yaml
+
+# Exclude any other files or directories you don't need in the build context
+*.md
+docs/

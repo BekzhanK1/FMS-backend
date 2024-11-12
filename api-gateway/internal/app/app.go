@@ -16,7 +16,7 @@ import (
 )
 
 func Run() {
-	utils.InitGRPCClient("localhost:5001")
+	utils.InitGRPCClient("document-service:5001")
 
 	router := mux.NewRouter()
 	routes.Routes(router)

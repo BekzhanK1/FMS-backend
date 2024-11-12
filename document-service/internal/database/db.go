@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"document-service/internal/config"
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -9,7 +10,7 @@ import (
 )
 
 func MongoConnect() (*mongo.Client, error) {
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	clientOptions := options.Client().ApplyURI(config.Envs.MongoUri)
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		return nil, err
