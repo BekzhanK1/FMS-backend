@@ -8,19 +8,26 @@ chat_manager = ChatManager()
 
 templates = Jinja2Templates(directory="app/templates")
 
-
-@app.get("/chat", response_class=HTMLResponse)
-def render_chat(request: Request):
-    return templates.TemplateResponse("client.html", {"request": request})
+users = ["user1", "user2", "user3"]
 
 
-@app.websocket("/ws/chat")
-async def websocket_endpoint(websocket: WebSocket):
-    await chat_manager.connect(websocket)
+@app.get("/", response_class=HTMLResponse)
+async def list_users(request: Request):
+    return templates.TemplateResponse("users-list.html", {"request": request, "users": users})
+
+
+@app.get("/chat/{user_id}", response_class=HTMLResponse)
+async def chat_page(request: Request, user_id: str):
+    return templates.TemplateResponse("chat.html", {"request": request, "user_id": user_id})
+
+
+@app.websocket("/ws/chat/{user_id}")
+async def websocket_endpoint(websocket: WebSocket, user_id: str):
+    await chat_manager.connect(user_id, websocket)
     try:
         while True:
             data = await websocket.receive_text()
-            await chat_manager.broadcast(f"Client says: {data}")
+            # Echo message back to the user and broadcast to the recipient
+            await chat_manager.send_message_to_user(user_id, f"User says: {data}")
     except WebSocketDisconnect:
-        chat_manager.disconnect(websocket)
-        await chat_manager.broadcast("A client disconnected.")
+        chat_manager.disconnect(user_id, websocket)
