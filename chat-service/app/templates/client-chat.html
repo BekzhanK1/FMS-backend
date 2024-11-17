@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Chat Room</title>
+	</head>
+	<body>
+		<h1>Chat between Farmer ({{ farmer_id }}) and Client ({{ client_id }})</h1>
+		<div id="chat-box"></div>
+		<input type="text" id="messageInput" placeholder="Type a message..." />
+		<button onclick="sendMessage()">Send</button>
+		<script>
+			const roomId = "{{ room_id }}";
+			const ws = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${roomId}`);
+			const messagesDiv = document.getElementById("chat-box");
+
+			ws.onmessage = function (event) {
+				const message = document.createElement("div");
+				message.textContent = event.data;
+				messagesDiv.appendChild(message);
+			};
+
+			function sendMessage() {
+				const input = document.getElementById("messageInput");
+				const payload = JSON.stringify({
+					sender: {{ client_id }}, // Specify the sender
+					message: input.value,
+				});
+				ws.send(payload);
+				input.value = "";
+			}
+		</script>
+	</body>
+</html>
