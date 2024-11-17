@@ -48,8 +48,8 @@ func Run() {
 	// Apply CORS middleware to the main router
 	corsRouter := enableCors(r)
 
-	log.Println("Starting server on :5000")
-	err = http.ListenAndServe(":5000", corsRouter) // Use corsRouter here
+	log.Println("Starting server on :5002")
+	err = http.ListenAndServe(":5002", corsRouter) // Use corsRouter here
 	if err != nil {
 		log.Fatal(err)
 	}

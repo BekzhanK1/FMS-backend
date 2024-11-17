@@ -15,11 +15,11 @@ func Routes(router *mux.Router) {
 
 	router = router.PathPrefix("/api/v1").Subrouter()
 
-	// usersRouter := router.PathPrefix("/users").Subrouter()
+	usersRouter := router.PathPrefix("/users").Subrouter()
 	// usersRouter.HandleFunc("", handlers.GetUsersHandler).Methods(http.MethodGet)
 	// usersRouter.HandleFunc("", handlers.CreateUserHandler).Methods(http.MethodPost)
 	// usersRouter.HandleFunc("/search", handlers.GetUserByQueryHandler).Methods(http.MethodGet)
-	// usersRouter.HandleFunc("/{id}", handlers.GetUserByIDHandler).Methods(http.MethodGet)
+	usersRouter.HandleFunc("/{id}", handlers.GetUserHandler).Methods(http.MethodGet)
 	// usersRouter.HandleFunc("/{id}", handlers.UpdateUserHandler).Methods(http.MethodPut)
 	// usersRouter.HandleFunc("/{id}", handlers.DeleteUserHandler).Methods(http.MethodDelete)
 
