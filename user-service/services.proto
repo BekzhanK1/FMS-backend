@@ -1,0 +1,181 @@
+syntax = "proto3";
+
+package services;
+
+option go_package = "services/pb";
+
+import "google/protobuf/empty.proto";
+
+// ----- ENUM DEFINITIONS -----
+enum Role {
+    ROLE_UNSPECIFIED = 0;
+    FARMER = 1;
+    BUYER = 2;
+    ADMIN = 3;
+}
+
+enum ApplicationStatus {
+    STATUS_UNSPECIFIED = 0;
+    PENDING = 1;
+    APPROVED = 2;
+    REJECTED = 3;
+    UNDER_REVIEW = 4;
+}
+
+// ----- MESSAGE DEFINITIONS -----
+message User {
+    int32 id = 1;
+    string email = 2;
+    string username = 3;
+    string first_name = 4;
+    string last_name = 5;
+    string phone_number = 6;
+    string password_hash = 7;
+    bool is_active = 8;
+    Role role = 9;
+    string profile_picture_url = 10;
+    string created_at = 11;
+    string updated_at = 12;
+}
+
+message CreateUserRequest {
+    string email = 1;
+    string username = 2;
+    string first_name = 3;
+    string last_name = 4;
+    string phone_number = 5;
+    string password = 6;
+    Role role = 7;
+    string profile_picture = 8;
+}
+
+message CreateUserResponse {
+    string message = 1;
+    string encrypted_email = 2;
+}
+
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    string access_token = 1;
+    string refresh_token = 2;
+}
+
+message UpdateUserRequest {
+    int32 id = 1;
+    string username = 2;
+    string phone_number = 3;
+    string profile_picture = 4;
+    bool is_active = 5;
+}
+
+message GetUserRequest {
+    int32 id = 1;
+}
+
+message GetUserResponse {
+    int32 id = 1;
+    string email = 2;
+    string username = 3;
+    string first_name = 4;
+    string last_name = 5;
+    string phone_number = 6;
+    Role role = 7;
+    string profile_picture_url = 8;
+    bool is_active = 9;
+}
+
+message DeleteUserRequest {
+    int32 id = 1;
+}
+
+message DeleteUserResponse {
+    string message = 1;
+}
+
+message Token {
+    int32 id = 1;
+    int32 user_id = 2;
+    string token = 3;
+    string expiration = 4;
+}
+
+message CreateTokenRequest {
+    int32 user_id = 1;
+    string token = 2;
+    string expiration = 3;
+}
+
+message CreateTokenResponse {
+    string message = 1;
+}
+
+message UpdateTokenRequest {
+    int32 user_id = 1;
+    string token = 2;
+    string expiration = 3;
+}
+
+message FarmerInfo {
+    int32 farmer_id = 1;
+    float rating = 2;
+    int32 experience = 3;
+    string bio = 4;
+}
+
+message Farm {
+    int32 id = 1;
+    int32 farmer_id = 2;
+    string name = 3;
+    string address = 4;
+    string geo_loc = 5;
+    string size = 6;
+    string crop_types = 7;
+    bool is_verified = 8;
+}
+
+message Application {
+    int32 id = 1;
+    int32 farmer_id = 2;
+    int32 farm_id = 3;
+    ApplicationStatus status = 4;
+    string rejection_reason = 5;
+    string created_at = 6;
+}
+message ActivateUserRequest {
+    string encrypted_email = 1;
+    string otp = 2;
+}
+
+message ActivateUserResponse {
+    string message = 1;
+}
+
+// ----- SERVICE DEFINITIONS -----
+service UserService {
+    rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+    rpc ActivateUser(ActivateUserRequest) returns (ActivateUserResponse);
+    rpc Login(LoginRequest) returns (LoginResponse);
+    rpc GetUser(GetUserRequest) returns (GetUserResponse);
+    rpc UpdateUser(UpdateUserRequest) returns (google.protobuf.Empty);
+    rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+}
+
+service FarmerService {
+    rpc GetFarmerInfo(GetUserRequest) returns (FarmerInfo);
+}
+
+service FarmService {
+    rpc CreateFarm(Farm) returns (Farm);
+    rpc GetFarmByID(GetUserRequest) returns (Farm);
+    rpc ListFarms(google.protobuf.Empty) returns (stream Farm);
+}
+
+service ApplicationService {
+    rpc CreateApplication(Application) returns (google.protobuf.Empty);
+    rpc GetApplicationByID(GetUserRequest) returns (Application);
+    rpc ListApplications(google.protobuf.Empty) returns (stream Application);
+}
