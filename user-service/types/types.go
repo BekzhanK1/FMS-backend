@@ -64,7 +64,7 @@ type CreateUserPayload struct {
 	LastName       string      `json:"last_name" validate:"omitempty"`
 	Phone          string      `json:"phone" validate:"required"`
 	Password       string      `json:"password" validate:"required"`
-	Role           models.Role `json:"role" validate:"required,oneof=Farmer Buyer Admin"`
+	Role           models.Role `json:"role" validate:"required,oneof=FARMER BUYER ADMIN"`
 	ProfilePicture string      `json:"profile_picture" validate:"omitempty"`
 }
 
