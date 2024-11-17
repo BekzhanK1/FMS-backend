@@ -10,6 +10,43 @@ services:
     depends_on:
       - document-service
 
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    working_dir: /app
+    ports:
+      - "5002:5002"
+    container_name: user-service
+    environment:
+      PUBLIC_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: 1234
+      DB_NAME: farmers
+    env_file:
+      - ./user-service/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: farmers
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   document-service:
     build: ./document-service
     working_dir: /app
@@ -42,3 +79,4 @@ services:
 
 volumes:
   mongo_data:
+  postgres_data:

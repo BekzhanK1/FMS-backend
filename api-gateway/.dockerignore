@@ -33,7 +33,7 @@ node_modules
 test-results/
 
 # Exclude environment and configuration files (if not needed)
-.env
+# .env
 config.local.yaml
 
 # Exclude any other files or directories you don't need in the build context
