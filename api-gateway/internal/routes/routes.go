@@ -23,7 +23,17 @@ func Routes(router *mux.Router) {
 	usersRouter.HandleFunc("/{id}", handlers.DeleteUserHandler).Methods(http.MethodDelete)
 	usersRouter.HandleFunc("/activate", handlers.ActivateUserHandler).Methods(http.MethodPost)
 
+	farmsRouter := router.PathPrefix("/farms").Subrouter()
+	farmsRouter.HandleFunc("", handlers.CreateFarmHandler).Methods(http.MethodPost)
+	farmsRouter.HandleFunc("", handlers.ListFarmsHandler).Methods(http.MethodGet)
+	farmsRouter.HandleFunc("/{id}", handlers.GetFarmByID).Methods(http.MethodGet)
+	farmsRouter.HandleFunc("/farmer/{id}", handlers.ListFarmsByFarmerIDHandler).Methods(http.MethodGet)
 
+	applicationsRouter := router.PathPrefix("/applications").Subrouter()
+	applicationsRouter.HandleFunc("", handlers.ListAppsHandler).Methods(http.MethodGet)
+	applicationsRouter.HandleFunc("/{id}", handlers.GetApplicationByIDHandler).Methods(http.MethodGet)
+	applicationsRouter.HandleFunc("/{id}", handlers.UpdateApplicationHandler).Methods(http.MethodPut)
+	applicationsRouter.HandleFunc("/farmer/{id}", handlers.ListAppsByFarmerIDHandler).Methods(http.MethodGet)
 
 	productsRouter := router.PathPrefix("/documents").Subrouter()
 	productsRouter.HandleFunc("", handlers.GetDocumentsHandler).Methods(http.MethodGet)
