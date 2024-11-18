@@ -2,10 +2,12 @@ package user
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"time"
 	"user-service/internal/helpers"
 	"user-service/internal/models"
+	"user-service/internal/templates"
 	"user-service/types"
 )
 
@@ -24,8 +26,6 @@ func NewService(userStore types.UserStore, otpStore types.OTPStore, farmerInfoSt
 		buyerInfoStore:  buyerInfoStore,
 	}
 }
-
-const otpTemplatePath = "internal/templates/activation_otp.html"
 
 func (s *Service) CreateUser(email, username, first_name, last_name, phone, passwordHash string, isActive bool, role models.Role, profilePicture string) (string, error) {
 	if role == models.Admin {
@@ -82,7 +82,12 @@ func (s *Service) CreateUser(email, username, first_name, last_name, phone, pass
 	otpData := helpers.OTPData{
 		OtpCode: OtpCode,
 	}
-	helpers.SendEmail(user.Email, "Your OTP Code", otpData, otpTemplatePath)
+
+	t, err := template.New("").Parse(templates.ActivationOtp)
+	if err != nil {
+		return "", fmt.Errorf("could not load template: %v", err)
+	}
+	helpers.SendEmail(user.Email, "Your OTP Code", otpData, t)
 
 	return encryptedEmail, nil
 }
@@ -172,7 +177,12 @@ func (s *Service) ActivateUser(encryptedEmail string, otpCode string) error {
 		otpData := helpers.OTPData{
 			OtpCode: newOtpCode,
 		}
-		helpers.SendEmail(user.Email, "OTP Code", otpData, otpTemplatePath)
+
+		t, err := template.New("").Parse(templates.ActivationOtp)
+		if err != nil {
+			return fmt.Errorf("could not load template: %v", err)
+		}
+		helpers.SendEmail(user.Email, "Your OTP Code", otpData, t)
 
 		return fmt.Errorf("OTP is expired, a new OTP has been sent to email %s", user.Email)
 	}

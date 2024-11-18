@@ -18,6 +18,8 @@ services:
     ports:
       - "5002:5002"
     container_name: user-service
+    volumes:
+      - ./user-service/templates:/app/templates
     environment:
       PUBLIC_HOST: postgres
       DB_PORT: 5432
@@ -86,7 +88,8 @@ services:
     entrypoint: [
         "/bin/sh",
         "-c",
-        "migrate -path=/migrations -database postgres://postgres:1234@postgres:5432/farmers?sslmode=disable up",
+        "until nc -z postgres 5432; do echo 'Waiting for PostgreSQL...'; sleep 2; done && \
+        migrate -path=/migrations -database postgres://postgres:1234@postgres:5432/farmers?sslmode=disable up",
       ]
 
 volumes:

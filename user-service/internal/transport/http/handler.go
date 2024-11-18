@@ -45,8 +45,8 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 
 	router.HandleFunc("/register", h.CreateUserHandler).Methods(http.MethodPost)
 	router.HandleFunc("/login", h.LoginHandler).Methods(http.MethodPost)
+	router.HandleFunc("/activate", h.ActivateUserHandler).Methods(http.MethodPost)
 	router.HandleFunc("/{id}", h.GetUserHandler).Methods(http.MethodGet)
 	router.HandleFunc("/{id}", h.UpdateUserHandler).Methods(http.MethodPut)
 	router.HandleFunc("/{id}", h.DeleteUserHandler).Methods(http.MethodDelete)
-	router.HandleFunc("/activate", h.ActivateUserHandler).Methods(http.MethodPost)
 }
