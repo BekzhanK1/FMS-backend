@@ -77,6 +77,18 @@ services:
     depends_on:
       - mongo
 
+  migrations:
+    image: migrate/migrate
+    depends_on:
+      - postgres
+    volumes:
+      - ./user-service/migrations:/migrations
+    entrypoint: [
+        "/bin/sh",
+        "-c",
+        "migrate -path=/migrations -database postgres://postgres:1234@postgres:5432/farmers?sslmode=disable up",
+      ]
+
 volumes:
   mongo_data:
   postgres_data:
