@@ -140,6 +140,7 @@ type FarmResponse struct {
 	FarmDetails
 	Farmer FarmerResponse `json:"farmer"`
 }
+
 type FarmerResponse struct {
 	ID             int         `json:"id"`
 	FirstName      string      `json:"first_name"`

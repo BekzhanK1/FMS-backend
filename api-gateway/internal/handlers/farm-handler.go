@@ -6,6 +6,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+
+	apiUtils "api-gateway/internal/utils"
 )
 
 var farmsServiceUrl = userServiceURL + "/farms"
@@ -16,6 +18,9 @@ func ListFarmsHandler(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
+
+	apiUtils.CopyHeaders(r, req)
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -39,6 +44,9 @@ func CreateFarmHandler(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
+
+	apiUtils.CopyHeaders(r, req)
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -67,6 +75,9 @@ func GetFarmByID(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
+
+	apiUtils.CopyHeaders(r, req)
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -95,6 +106,9 @@ func ListFarmsByFarmerIDHandler(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
+
+	apiUtils.CopyHeaders(r, req)
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {

@@ -5,6 +5,8 @@ import (
 	"io"
 	"net/http"
 
+	apiUtils "api-gateway/internal/utils"
+
 	"github.com/gorilla/mux"
 )
 
@@ -17,6 +19,9 @@ func ListAppsHandler(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
+
+	apiUtils.CopyHeaders(r, req)
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -45,6 +50,9 @@ func GetApplicationByIDHandler(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
+
+	apiUtils.CopyHeaders(r, req)
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -73,6 +81,9 @@ func UpdateApplicationHandler(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
+
+	apiUtils.CopyHeaders(r, req)
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -101,6 +112,9 @@ func ListAppsByFarmerIDHandler(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
+
+	apiUtils.CopyHeaders(r, req)
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
